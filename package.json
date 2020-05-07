@@ -1,0 +1,53 @@
+{
+  "name": "livestream",
+  "description": "Livestream Backend",
+  "version": "0.0.0",
+  "private": true,
+  "homepage": "https://livestream.io",
+  "author": {
+    "name": "Livestream team",
+    "email": "contact@livestream.io",
+    "url": "https://livestream.io"
+  },
+  "scripts": {
+    "lint": "eslint '**/*.js'",
+    "start": "node src/app.js",
+    "build": "docker build -t livestream .",
+    "release-dist": "node tasks/release.js",
+    "publish-dist": "node tasks/publish.js"
+  },
+  "devDependencies": {
+    "eslint": "6.8.0",
+    "eslint-config-airbnb-base": "14.1.0",
+    "eslint-plugin-import": "2.20.2",
+    "release-n-publish": "0.0.9"
+  },
+  "dependencies": {
+    "app-module-path": "2.2.0",
+    "aws-sdk": "2.669.0",
+    "axios": "0.19.2",
+    "bcrypt": "4.0.1",
+    "bluebird": "3.7.2",
+    "body-parser": "1.19.0",
+    "compression": "1.7.4",
+    "cookie-parser": "1.4.5",
+    "cors": "2.8.5",
+    "date-fns": "2.12.0",
+    "express": "4.17.1",
+    "express-bearer-token": "2.4.0",
+    "googleapis": "49.0.0",
+    "json.date-extensions": "1.2.2",
+    "jsonwebtoken": "8.5.1",
+    "jsonwebtoken-redis": "1.0.6",
+    "lodash": "4.17.15",
+    "mkdirp": "1.0.4",
+    "mongoose": "5.9.10",
+    "morgan": "1.10.0",
+    "redis": "3.0.2",
+    "rimraf": "3.0.2",
+    "sharp": "0.25.2",
+    "uuid": "8.0.0",
+    "winston": "3.2.1",
+    "yamljs": "0.3.0"
+  }
+}

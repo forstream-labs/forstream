@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "arrow-body-style": ["error", "as-needed", {"requireReturnForObjectLiteral": true}],
+    "arrow-parens": ["error", "always"],
+    "max-len": ["error", {"code": 999, "tabWidth": 2}],
+    "no-underscore-dangle": ["error", {"allow": ["_id"] }],
+    "object-curly-newline": ["error", {"consistent": true}],
+    "object-curly-spacing": ["error", "never"],
+    "strict": ["error", "safe"]
+  },
+  "parserOptions": {
+    "sourceType": "script"
+  },
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "moduleDirectory": [
+          "node_modules",
+          "."
+        ]
+      }
+    }
+  }
+}
