@@ -72,6 +72,11 @@ exports.google = {
   },
 };
 
+exports.facebook = {
+  appId: getRequired('facebook.appId'),
+  appSecret: getRequired('facebook.appSecret'),
+};
+
 mkdirp.sync(this.publicPath);
 mkdirp.sync(this.uploadsPath);
 

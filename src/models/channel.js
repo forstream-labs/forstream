@@ -19,15 +19,11 @@ const Oauth2Config = new Schema({
   refresh_token: {type: String},
 }, {_id: false});
 
-const ConnectedChannelConfig = new Schema({
-  oauth2: {type: Oauth2Config, required: true},
-}, {_id: false});
-
 const ConnectedChannel = new Schema({
   user: {type: ObjectId, ref: 'User', required: true, index: true},
   channel: {type: ObjectId, ref: 'Channel', required: true, index: true},
   target_id: {type: String, required: true},
-  config: {type: ConnectedChannelConfig, required: true},
+  oauth2: {type: Oauth2Config, required: true},
   enabled: {type: Boolean, required: true},
   registration_date: {type: Date, required: true},
 }, {collection: 'connected_channels'});

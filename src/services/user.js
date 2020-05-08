@@ -3,6 +3,7 @@
 const configs = require('configs');
 const google = require('apis/google');
 const youtube = require('services/stream-providers/youtube');
+const facebook = require('services/stream-providers/facebook');
 const {Channel, ConnectedChannel, LiveStream, User} = require('models');
 const constants = require('utils/constants');
 const errors = require('utils/errors');
@@ -15,6 +16,7 @@ const oauth2Api = google.api.oauth2;
 
 const PROVIDER_BY_CHANNEL = {};
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.YOUTUBE}`] = youtube;
+PROVIDER_BY_CHANNEL[`${constants.channel.identifier.FACEBOOK}`] = facebook;
 
 function setupChannels() {
   setTimeout(async () => {
@@ -27,28 +29,48 @@ function setupChannels() {
         registration_date: new Date(),
       }).save();
     }
+    const facebookChannel = await queries.find(Channel, {identifier: constants.channel.identifier.FACEBOOK}, {require: false});
+    if (!facebookChannel) {
+      await new Channel({
+        name: 'Facebook',
+        identifier: constants.channel.identifier.FACEBOOK,
+        image_url: `${configs.publicUrl}/channels/youtube.png`,
+        registration_date: new Date(),
+      }).save();
+    }
   }, 5000);
 }
 
+async function connectChannel(user, identifier, targetId, oauth2) {
+  const channel = await queries.find(Channel, {identifier});
+  let connectedChannel = await queries.find(ConnectedChannel, {user: user.id, channel: channel.id}, {require: false});
+  if (!connectedChannel) {
+    connectedChannel = new ConnectedChannel({
+      user,
+      channel,
+      enabled: true,
+      registration_date: new Date(),
+    });
+  }
+  connectedChannel.set({
+    target_id: targetId,
+    oauth2,
+  });
+  return connectedChannel.save();
+}
+
 async function createProviderStream(user, connectedChannel, title, description, startDate) {
-  const channel = connectedChannel.channel;
+  const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && connectedChannel.enabled) {
-    const oauth2 = await provider.getOauth2(connectedChannel);
-    logger.info('[User %s] [Provider %s] Creating broadcast...', user.id, channel.identifier);
-    const broadcast = await provider.createBroadcast(oauth2, title, description, startDate);
-    logger.info('[User %s] [Provider %s] Creating stream...', user.id, channel.identifier);
-    const stream = await provider.createStream(oauth2, title);
-    logger.info('[User %s] [Provider %s] Binding broadcast to stream...', user.id, channel.identifier);
-    await provider.bindBroadcast(oauth2, broadcast, stream);
-    logger.info('[User %s] [Provider %s] Live stream created!', user.id, channel.identifier);
+    logger.info('[User %s] [Provider %s] Creating stream..', user.id, channel.identifier);
+    const liveStream = await provider.createLiveStream(connectedChannel, title, description, startDate);
+    logger.info('[User %s] [Provider %s] Stream created!', user.id, channel.identifier);
     return {
       connected_channel: connectedChannel,
-      broadcast_id: broadcast.id,
-      stream_id: stream.id,
-      stream_name: stream.stream_name,
-      stream_status: constants.streamProvider.streamStatus.READY,
-      ingestion_address: stream.ingestion_address,
+      broadcast_id: liveStream.broadcast_id,
+      stream_url: liveStream.stream_url,
+      stream_status: constants.streamStatus.READY,
     };
   }
   return null;
@@ -56,13 +78,12 @@ async function createProviderStream(user, connectedChannel, title, description, 
 
 async function startProviderStream(liveStream, providerStream) {
   const connectedChannel = providerStream.connected_channel;
-  const channel = connectedChannel.channel;
+  const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && connectedChannel.enabled) {
-    const oauth2 = await provider.getOauth2(connectedChannel);
     logger.info('[LiveStream %s] [Provider %s] Starting live stream...', liveStream.id, channel.identifier);
-    const broadcast = await provider.startLive(oauth2, {id: providerStream.broadcast_id});
-    providerStream.stream_status = constants.streamProvider.streamStatus.LIVE,
+    await provider.startLiveStream(providerStream);
+    providerStream.set({stream_status: constants.streamStatus.LIVE});
     logger.info('[LiveStream %s] [Provider %s] Live stream started!', liveStream.id, channel.identifier);
   }
 }
@@ -113,27 +134,22 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   const oauth2 = await google.getOauth2(authCode);
   const targetId = await youtube.getTargetId(oauth2);
 
-  const channel = await queries.find(Channel, {identifier: constants.channel.identifier.YOUTUBE});
-  let connectedChannel = await queries.find(ConnectedChannel, {user: loadedUser.id, channel: channel.id}, {require: false});
-  if (!connectedChannel) {
-    connectedChannel = new ConnectedChannel({
-      user,
-      channel,
-      enabled: true,
-      registration_date: new Date(),
-    });
-  }
-  connectedChannel.set({
-    target_id: targetId,
-    config: {
-      oauth2: {
-        access_token: oauth2.credentials.access_token,
-        refresh_token: oauth2.credentials.refresh_token,
-      },
-    },
-  });
-  await connectedChannel.save();
+  const oauth2Config = {access_token: oauth2.credentials.access_token, refresh_token: oauth2.credentials.refresh_token};
+  const connectedChannel = connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
   logger.info('[User %s] YouTube channel %s connected!', loadedUser.id, connectedChannel.id);
+  return connectedChannel;
+};
+
+exports.connectFacebookChannel = async (user, accessToken) => {
+  logger.info('[User %s] Connecting Facebook channel...', user.id);
+  const loadedUser = await queries.get(User, user.id);
+
+  logger.info('[User %s] Getting target id...', user.id);
+  const targetId = await facebook.getTargetId(accessToken);
+
+  const oauth2Config = {access_token: accessToken};
+  const connectedChannel = connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
+  logger.info('[User %s] Facebook channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
 
@@ -151,12 +167,12 @@ exports.createLiveStream = async (user, title, description) => {
   connectedChannels.forEach((connectedChannel) => {
     promises.push(createProviderStream(loadedUser, connectedChannel, finalTitle, finalDescription, startDate));
   });
-  const streamProviders = await Promise.all(promises);
+  const providers = await Promise.all(promises);
   const liveStream = new LiveStream({
     owner: loadedUser,
     title: finalTitle,
     description: finalDescription,
-    stream_providers: streamProviders.filter((streamProvider) => streamProvider !== null),
+    providers: providers.filter((provider) => provider !== null),
     start_date: startDate,
     registration_date: new Date(),
   });
@@ -170,13 +186,13 @@ exports.startLiveStream = async (liveStream) => {
   const promises = [];
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
     populate: {
-      path: 'stream_providers.connected_channel', populate: 'channel'
+      path: 'providers.connected_channel', populate: 'channel',
     },
   });
-  loadedLiveStream.stream_providers.forEach((streamProvider) => {
+  loadedLiveStream.providers.forEach((streamProvider) => {
     promises.push(startProviderStream(liveStream, streamProvider));
   });
-  await Promise.all(promises)
+  await Promise.all(promises);
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream started!', loadedLiveStream.id);
   return loadedLiveStream;

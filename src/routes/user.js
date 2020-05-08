@@ -27,6 +27,11 @@ async function connectYouTubeChannel(req, res) {
   res.json(connectedChannel);
 }
 
+async function connectFacebookChannel(req, res) {
+  const connectedChannel = await userService.connectFacebookChannel(req.user, req.body.access_token);
+  res.json(connectedChannel);
+}
+
 // Streams
 
 async function createLiveStream(req, res) {
@@ -50,6 +55,7 @@ module.exports = (express, app) => {
   router.post('/sign_in/google', helpers.baseCallback(signInWithGoogle));
   router.post('/sign_out', userAuthenticated, helpers.baseCallback(signOut));
   router.post('/channels/youtube', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
+  router.post('/channels/facebook', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
   router.post('/streams', userAuthenticated, helpers.baseCallback(createLiveStream));
   router.post('/streams/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
   router.post('/streams/:live_stream/stop', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(stopLiveStream));

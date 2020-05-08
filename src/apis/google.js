@@ -25,7 +25,7 @@ exports.getOauth2 = async (authCode) => {
   return oauth2;
 };
 
-exports.getOauth2WithTokens = async (tokens) => {
+exports.getOauth2WithTokens = (tokens) => {
   const oauth2 = new google.auth.OAuth2(configs.google.oauth2.clientId, configs.google.oauth2.clientSecret);
   oauth2.setCredentials(tokens);
   return oauth2;

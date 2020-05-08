@@ -8,13 +8,12 @@ module.exports = Object.freeze({
   channel: Object.freeze({
     identifier: Object.freeze({
       YOUTUBE: 'youtube',
+      FACEBOOK: 'facebook',
     }),
   }),
-  streamProvider: Object.freeze({
-    streamStatus: Object.freeze({
-      READY: 'ready',
-      LIVE: 'live',
-      COMPLETE: 'complete',
-    }),
+  streamStatus: Object.freeze({
+    READY: 'ready',
+    LIVE: 'live',
+    COMPLETE: 'complete',
   }),
 });
