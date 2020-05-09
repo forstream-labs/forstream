@@ -12,8 +12,15 @@ module.exports = Object.freeze({
     }),
   }),
   streamStatus: Object.freeze({
+    ERROR: 'error',
     READY: 'ready',
     LIVE: 'live',
     COMPLETE: 'complete',
+  }),
+  providerMessage: Object.freeze({
+    type: Object.freeze({
+      ERROR: 'error',
+      WARNING: 'warning',
+    }),
   }),
 });

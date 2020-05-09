@@ -63,15 +63,10 @@ async function createProviderStream(user, connectedChannel, title, description, 
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && connectedChannel.enabled) {
-    logger.info('[User %s] [Provider %s] Creating stream..', user.id, channel.identifier);
-    const liveStream = await provider.createLiveStream(connectedChannel, title, description, startDate);
-    logger.info('[User %s] [Provider %s] Stream created!', user.id, channel.identifier);
-    return {
-      connected_channel: connectedChannel,
-      broadcast_id: liveStream.broadcast_id,
-      stream_url: liveStream.stream_url,
-      stream_status: constants.streamStatus.READY,
-    };
+    logger.info('[User %s] [Provider %s] Creating provider stream..', user.id, channel.identifier);
+    const provideStream = await provider.createLiveStream(connectedChannel, title, description, startDate);
+    logger.info('[User %s] [Provider %s] Provider stream created!', user.id, channel.identifier);
+    return {connected_channel: connectedChannel, ...provideStream};
   }
   return null;
 }
@@ -81,10 +76,24 @@ async function startProviderStream(liveStream, providerStream) {
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && connectedChannel.enabled) {
-    logger.info('[LiveStream %s] [Provider %s] Starting live stream...', liveStream.id, channel.identifier);
-    await provider.startLiveStream(providerStream);
-    providerStream.set({stream_status: constants.streamStatus.LIVE});
-    logger.info('[LiveStream %s] [Provider %s] Live stream started!', liveStream.id, channel.identifier);
+    if (providerStream.stream_status === constants.streamStatus.READY) {
+      logger.info('[LiveStream %s] [Provider %s] Starting provider stream...', liveStream.id, channel.identifier);
+      await provider.startLiveStream(providerStream);
+      logger.info('[LiveStream %s] [Provider %s] Provider stream started!', liveStream.id, channel.identifier);
+    }
+  }
+}
+
+async function endProviderStream(liveStream, providerStream) {
+  const connectedChannel = providerStream.connected_channel;
+  const {channel} = connectedChannel;
+  const provider = PROVIDER_BY_CHANNEL[channel.identifier];
+  if (provider && connectedChannel.enabled) {
+    if (providerStream.stream_status === constants.streamStatus.LIVE) {
+      logger.info('[LiveStream %s] [Provider %s] Ending provider stream...', liveStream.id, channel.identifier);
+      await provider.endLiveStream(providerStream);
+      logger.info('[LiveStream %s] [Provider %s] Provider stream ended!', liveStream.id, channel.identifier);
+    }
   }
 }
 
@@ -135,7 +144,7 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   const targetId = await youtube.getTargetId(oauth2);
 
   const oauth2Config = {access_token: oauth2.credentials.access_token, refresh_token: oauth2.credentials.refresh_token};
-  const connectedChannel = connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
   logger.info('[User %s] YouTube channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
@@ -148,7 +157,7 @@ exports.connectFacebookChannel = async (user, accessToken) => {
   const targetId = await facebook.getTargetId(accessToken);
 
   const oauth2Config = {access_token: accessToken};
-  const connectedChannel = connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
   logger.info('[User %s] Facebook channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
@@ -161,7 +170,7 @@ exports.createLiveStream = async (user, title, description) => {
     throw errors.apiError('no_channels_connected', 'No channels connected');
   }
   const finalTitle = title || `Live with ${loadedUser.full_name}`;
-  const finalDescription = description || 'Live stream provided by livestream.io';
+  const finalDescription = description || 'Live stream provided by LiveStream';
   const startDate = new Date();
   const promises = [];
   connectedChannels.forEach((connectedChannel) => {
@@ -172,6 +181,7 @@ exports.createLiveStream = async (user, title, description) => {
     owner: loadedUser,
     title: finalTitle,
     description: finalDescription,
+    status: constants.streamStatus.READY,
     providers: providers.filter((provider) => provider !== null),
     start_date: startDate,
     registration_date: new Date(),
@@ -189,17 +199,38 @@ exports.startLiveStream = async (liveStream) => {
       path: 'providers.connected_channel', populate: 'channel',
     },
   });
-  loadedLiveStream.providers.forEach((streamProvider) => {
-    promises.push(startProviderStream(liveStream, streamProvider));
+  if (![constants.streamStatus.READY, constants.streamStatus.ERROR].includes(loadedLiveStream.status)) {
+    throw errors.apiError('live_stream_already_started', 'Live stream already started');
+  }
+  loadedLiveStream.providers.forEach((providerStream) => {
+    promises.push(startProviderStream(liveStream, providerStream));
   });
   await Promise.all(promises);
+  loadedLiveStream.set({status: constants.streamStatus.LIVE});
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream started!', loadedLiveStream.id);
   return loadedLiveStream;
 };
 
-exports.stopLiveStream = async () => {
-
+exports.endLiveStream = async (liveStream) => {
+  logger.info('[LiveStream %s] Ending live stream...', liveStream.id);
+  const promises = [];
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
+    populate: {
+      path: 'providers.connected_channel', populate: 'channel',
+    },
+  });
+  if (!constants.streamStatus.LIVE) {
+    throw errors.apiError('live_stream_not_live', 'Live stream is not live');
+  }
+  loadedLiveStream.providers.forEach((providerStream) => {
+    promises.push(endProviderStream(liveStream, providerStream));
+  });
+  await Promise.all(promises);
+  loadedLiveStream.set({status: constants.streamStatus.COMPLETE});
+  await loadedLiveStream.save();
+  logger.info('[LiveStream %s] Live stream ended!', loadedLiveStream.id);
+  return loadedLiveStream;
 };
 
 setupChannels();

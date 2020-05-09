@@ -44,8 +44,8 @@ async function startLiveStream(req, res) {
   res.json(liveStream);
 }
 
-async function stopLiveStream(req, res) {
-  const liveStream = await userService.stopLiveStream(req.live_stream);
+async function endLiveStream(req, res) {
+  const liveStream = await userService.endLiveStream(req.live_stream);
   res.json(liveStream);
 }
 
@@ -58,7 +58,7 @@ module.exports = (express, app) => {
   router.post('/channels/facebook', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
   router.post('/streams', userAuthenticated, helpers.baseCallback(createLiveStream));
   router.post('/streams/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
-  router.post('/streams/:live_stream/stop', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(stopLiveStream));
+  router.post('/streams/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
 
   app.use('/users', router);
 };

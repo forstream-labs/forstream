@@ -1,6 +1,7 @@
 'use strict';
 
 const google = require('apis/google');
+const constants = require('utils/constants');
 const logger = require('utils/logger');
 
 const youtubeApi = google.api.youtube;
@@ -11,6 +12,7 @@ async function createBroadcast(auth, title, description, startDate) {
     part: 'id,snippet,contentDetails,status',
     resource: {
       contentDetails: {
+        enableAutoStart: true,
         monitorStream: {
           enableMonitorStream: false,
         },
@@ -38,9 +40,9 @@ async function createStream(auth, title) {
         title,
       },
       cdn: {
-        frameRate: '30fps',
+        frameRate: 'variable',
         ingestionType: 'rtmp',
-        resolution: '480p',
+        resolution: 'variable',
       },
     },
   });
@@ -70,29 +72,46 @@ exports.getTargetId = async (auth) => {
 };
 
 exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
-  const auth = google.getOauth2WithTokens(connectedChannel.oauth2);
-  logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
-  const broadcast = await createBroadcast(auth, title, description, startDate);
-  logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, connectedChannel.channel.identifier);
-  const stream = await createStream(auth, title);
-  logger.info('[User %s] [Provider %s] Binding broadcast to stream...', connectedChannel.user, connectedChannel.channel.identifier);
-  await bindBroadcast(auth, broadcast, stream);
-  return {
-    broadcast_id: broadcast.id,
-    stream_url: stream.url,
-  };
+  try {
+    const auth = google.getOauth2WithTokens(connectedChannel.oauth2);
+    logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
+    const broadcast = await createBroadcast(auth, title, description, startDate);
+    logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, connectedChannel.channel.identifier);
+    const stream = await createStream(auth, title);
+    logger.info('[User %s] [Provider %s] Binding broadcast to stream...', connectedChannel.user, connectedChannel.channel.identifier);
+    await bindBroadcast(auth, broadcast, stream);
+    return {
+      broadcast_id: broadcast.id,
+      stream_url: stream.url,
+      stream_status: constants.streamStatus.READY,
+    };
+  } catch (err) {
+    const {errors} = err;
+    const messages = errors.map((error) => {
+      return {
+        type: constants.providerMessage.type.ERROR,
+        code: error.reason,
+        message: error.message,
+      };
+    });
+    return {
+      messages,
+      stream_status: constants.streamStatus.ERROR,
+    };
+  }
 };
 
-exports.startLiveStream = async (liveStream) => {
-  const auth = google.getOauth2WithTokens(liveStream.connected_channel.oauth2);
+exports.startLiveStream = async (providerStream) => {
+  providerStream.set({stream_status: constants.streamStatus.LIVE});
+};
+
+exports.endLiveStream = async (providerStream) => {
+  const auth = google.getOauth2WithTokens(providerStream.connected_channel.oauth2);
   await youtubeApi.liveBroadcasts.transition({
     auth,
-    id: liveStream.broadcast_id,
-    broadcastStatus: 'live',
+    id: providerStream.broadcast_id,
+    broadcastStatus: 'complete',
     part: 'id,snippet,contentDetails,status',
   });
-};
-
-exports.stopLiveStream = async () => {
-
+  providerStream.set({stream_status: constants.streamStatus.COMPLETE});
 };
