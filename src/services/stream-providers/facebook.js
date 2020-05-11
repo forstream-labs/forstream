@@ -1,11 +1,11 @@
 'use strict';
 
-const facebook = require('apis/facebook');
+const facebookApi = require('apis/facebook');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 
 exports.getTargetId = async (auth) => {
-  const user = await facebook.api('me', {access_token: auth});
+  const user = await facebookApi.api('me', {access_token: auth});
   return user.id;
 };
 
@@ -13,7 +13,7 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
   try {
     const accessToken = connectedChannel.oauth2.access_token;
     logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
-    const broadcast = await facebook.api(`${connectedChannel.target_id}/live_videos`, 'POST', {
+    const broadcast = await facebookApi.api(`${connectedChannel.target_id}/live_videos`, 'POST', {
       title,
       description,
       status: 'LIVE_NOW',
@@ -43,7 +43,7 @@ exports.startLiveStream = async (providerStream) => {
 
 exports.endLiveStream = async (providerStream) => {
   const accessToken = providerStream.connected_channel.oauth2.access_token;
-  await facebook.api(`${providerStream.broadcast_id}`, 'POST', {
+  await facebookApi.api(`${providerStream.broadcast_id}`, 'POST', {
     end_live_video: true,
     access_token: accessToken,
   });

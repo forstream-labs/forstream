@@ -1,10 +1,10 @@
 'use strict';
 
-const google = require('apis/google');
+const googleApi = require('apis/google');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 
-const youtubeApi = google.api.youtube;
+const youtubeApi = googleApi.youtube;
 
 async function createBroadcast(auth, title, description, startDate) {
   const broadcast = await youtubeApi.liveBroadcasts.insert({
@@ -73,7 +73,7 @@ exports.getTargetId = async (auth) => {
 
 exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
   try {
-    const auth = google.getOauth2WithTokens(connectedChannel.oauth2);
+    const auth = googleApi.getOauth2WithTokens(connectedChannel.oauth2);
     logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
     const broadcast = await createBroadcast(auth, title, description, startDate);
     logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, connectedChannel.channel.identifier);
@@ -106,7 +106,7 @@ exports.startLiveStream = async (providerStream) => {
 };
 
 exports.endLiveStream = async (providerStream) => {
-  const auth = google.getOauth2WithTokens(providerStream.connected_channel.oauth2);
+  const auth = googleApi.getOauth2WithTokens(providerStream.connected_channel.oauth2);
   await youtubeApi.liveBroadcasts.transition({
     auth,
     id: providerStream.broadcast_id,

@@ -13,10 +13,8 @@ const youtubeApi = google.youtube({
   auth: configs.google.serverKey,
 });
 
-exports.api = {
-  oauth2: oauth2Api,
-  youtube: youtubeApi,
-};
+exports.oauth2 = oauth2Api;
+exports.youtube = youtubeApi;
 
 exports.getOauth2 = async (authCode) => {
   const oauth2 = new google.auth.OAuth2(configs.google.oauth2.clientId, configs.google.oauth2.clientSecret);
