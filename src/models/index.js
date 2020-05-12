@@ -2,7 +2,7 @@
 
 const mongo = require('apis/mongo');
 const {Channel, ConnectedChannel} = require('models/channel');
-const {LiveStream} = require('models/live-stream');
+const {LiveStream} = require('models/stream');
 const {User} = require('models/user');
 const _ = require('lodash');
 

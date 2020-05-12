@@ -1,6 +1,6 @@
 'use strict';
 
-const liveStreamService = require('services/live-stream');
+const liveStreamService = require('services/stream');
 const errors = require('utils/errors');
 const logger = require('utils/logger');
 const session = require('utils/session');

@@ -1,16 +1,10 @@
 'use strict';
 
-const {
-  decodeToken,
-  liveStreamBelongsToUser,
-  userAuthenticated,
-} = require('routes/middlewares');
+const {decodeToken, userAuthenticated} = require('routes/middlewares');
 const helpers = require('routes/helpers');
 const userService = require('services/user');
 const errors = require('utils/errors');
 const session = require('utils/session');
-
-// User
 
 async function getMyUser(req, res) {
   await decodeToken(req);
@@ -42,35 +36,6 @@ async function signOut(req, res) {
   res.json();
 }
 
-// Channels
-
-async function connectYouTubeChannel(req, res) {
-  const connectedChannel = await userService.connectYouTubeChannel(req.user, req.body.auth_code);
-  res.json(connectedChannel);
-}
-
-async function connectFacebookChannel(req, res) {
-  const connectedChannel = await userService.connectFacebookChannel(req.user, req.body.access_token);
-  res.json(connectedChannel);
-}
-
-// Streams
-
-async function createLiveStream(req, res) {
-  const liveStream = await userService.createLiveStream(req.user, req.body.title, req.body.description);
-  res.json(liveStream);
-}
-
-async function startLiveStream(req, res) {
-  const liveStream = await userService.startLiveStream(req.live_stream);
-  res.json(liveStream);
-}
-
-async function endLiveStream(req, res) {
-  const liveStream = await userService.endLiveStream(req.live_stream);
-  res.json(liveStream);
-}
-
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
@@ -79,13 +44,6 @@ module.exports = (express, app) => {
   router.post('/sign_in/google', helpers.baseCallback(signInWithGoogle));
   router.post('/sign_in/facebook', helpers.baseCallback(signInWithFacebook));
   router.post('/sign_out', userAuthenticated, helpers.baseCallback(signOut));
-
-  router.post('/channels/youtube', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
-  router.post('/channels/facebook', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
-
-  router.post('/streams', userAuthenticated, helpers.baseCallback(createLiveStream));
-  router.post('/streams/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
-  router.post('/streams/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
 
   app.use('/users', router);
 };
