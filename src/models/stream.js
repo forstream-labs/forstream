@@ -22,12 +22,13 @@ const ProviderStream = new Schema({
 }, {_id: false});
 
 const LiveStream = new Schema({
-  owner: {type: ObjectId, ref: 'User', required: true, index: true},
+  user: {type: ObjectId, ref: 'User', required: true, index: true},
   title: {type: String, required: true},
   description: {type: String, required: true},
   status: {type: String, enum: _.values(constants.streamStatus), required: true},
   providers: {type: [ProviderStream], required: true},
   start_date: {type: Date, required: true},
+  end_date: {type: Date},
   registration_date: {type: Date, required: true},
 }, {collection: 'live_streams'});
 

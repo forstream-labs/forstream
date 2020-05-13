@@ -44,7 +44,7 @@ exports.liveStreamBelongsToUser = async (req, res, next) => {
       throw errors.permissionDeniedError();
     }
     const liveStream = await liveStreamService.getLiveStream(liveStreamId);
-    if (liveStream.owner.toString() !== req.user.id) {
+    if (liveStream.user.toString() !== req.user.id) {
       throw errors.permissionDeniedError();
     }
     req.live_stream = liveStream;

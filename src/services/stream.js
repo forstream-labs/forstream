@@ -51,6 +51,8 @@ async function endProviderStream(liveStream, providerStream) {
   }
 }
 
+exports.listLiveStreams = async (user, options) => queries.list(LiveStream, {user: user.id}, options);
+
 exports.getLiveStream = async (id, options) => queries.get(LiveStream, id, options);
 
 exports.createLiveStream = async (user, title, description) => {
@@ -69,7 +71,7 @@ exports.createLiveStream = async (user, title, description) => {
   });
   const providers = await Promise.all(promises);
   const liveStream = new LiveStream({
-    owner: loadedUser,
+    user: loadedUser,
     title: finalTitle,
     description: finalDescription,
     status: constants.streamStatus.READY,

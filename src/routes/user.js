@@ -1,18 +1,32 @@
 'use strict';
 
-const {decodeToken, userAuthenticated} = require('routes/middlewares');
+const {userAuthenticated} = require('routes/middlewares');
 const helpers = require('routes/helpers');
+const channelService = require('services/channel');
+const streamService = require('services/stream');
 const userService = require('services/user');
 const errors = require('utils/errors');
 const session = require('utils/session');
 
+// Users
+
 async function getMyUser(req, res) {
-  await decodeToken(req);
-  if (!req.user) {
-    throw errors.apiError('user_not_found', 'User not found');
-  }
   const user = await userService.getUser(req.user.id, helpers.getOptions(req));
   res.json(user);
+}
+
+// Channels
+
+async function listMyConnectedChannels(req, res) {
+  const connectedChannels = await channelService.listConnectedChannels(req.user, helpers.getOptions(req));
+  res.json(connectedChannels);
+}
+
+// Streams
+
+async function listMyLiveStreams(req, res) {
+  const liveStreams = await streamService.listLiveStreams(req.user, helpers.getOptions(req));
+  res.json(liveStreams);
 }
 
 // Sign in and Sign out
@@ -39,7 +53,9 @@ async function signOut(req, res) {
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
-  router.get('/me', helpers.baseCallback(getMyUser));
+  router.get('/me', userAuthenticated, helpers.baseCallback(getMyUser));
+  router.get('/me/channels', userAuthenticated, helpers.baseCallback(listMyConnectedChannels));
+  router.get('/me/streams', userAuthenticated, helpers.baseCallback(listMyLiveStreams));
 
   router.post('/sign_in/google', helpers.baseCallback(signInWithGoogle));
   router.post('/sign_in/facebook', helpers.baseCallback(signInWithFacebook));

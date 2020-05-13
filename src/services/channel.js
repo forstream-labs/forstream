@@ -52,6 +52,8 @@ async function connectChannel(user, identifier, targetId, oauth2) {
 
 exports.listChannels = async (options) => queries.list(Channel, null, options);
 
+exports.listConnectedChannels = async (user, options) => queries.list(ConnectedChannel, {user: user.id}, options);
+
 exports.connectYouTubeChannel = async (user, authCode) => {
   logger.info('[User %s] Connecting YouTube channel...', user.id);
   const loadedUser = await queries.get(User, user.id);
