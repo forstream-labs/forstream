@@ -24,7 +24,6 @@ const ConnectedChannel = new Schema({
   channel: {type: ObjectId, ref: 'Channel', required: true, index: true},
   target_id: {type: String, required: true},
   oauth2: {type: Oauth2Config, required: true},
-  enabled: {type: Boolean, required: true},
   registration_date: {type: Date, required: true},
 }, {collection: 'connected_channels'});
 ConnectedChannel.index({user: 1, channel: 1}, {unique: true});

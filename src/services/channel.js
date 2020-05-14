@@ -39,7 +39,6 @@ async function connectChannel(user, identifier, targetId, oauth2) {
     connectedChannel = new ConnectedChannel({
       user,
       channel,
-      enabled: true,
       registration_date: new Date(),
     });
   }

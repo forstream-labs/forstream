@@ -16,11 +16,15 @@ PROVIDER_BY_CHANNEL[`${constants.channel.identifier.FACEBOOK}`] = facebookSP;
 async function createProviderStream(user, connectedChannel, title, description, startDate) {
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
-  if (provider && connectedChannel.enabled) {
+  if (provider) {
     logger.info('[User %s] [Provider %s] Creating provider stream..', user.id, channel.identifier);
     const provideStream = await provider.createLiveStream(connectedChannel, title, description, startDate);
     logger.info('[User %s] [Provider %s] Provider stream created!', user.id, channel.identifier);
-    return {connected_channel: connectedChannel, ...provideStream};
+    return {
+      ...provideStream,
+      connected_channel: connectedChannel,
+      enabled: true,
+    };
   }
   return null;
 }
@@ -29,7 +33,7 @@ async function startProviderStream(liveStream, providerStream) {
   const connectedChannel = providerStream.connected_channel;
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
-  if (provider && connectedChannel.enabled) {
+  if (provider && providerStream.enabled) {
     if (providerStream.stream_status === constants.streamStatus.READY) {
       logger.info('[LiveStream %s] [Provider %s] Starting provider stream...', liveStream.id, channel.identifier);
       await provider.startLiveStream(providerStream);
@@ -42,7 +46,7 @@ async function endProviderStream(liveStream, providerStream) {
   const connectedChannel = providerStream.connected_channel;
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
-  if (provider && connectedChannel.enabled) {
+  if (provider && providerStream.enabled) {
     if (providerStream.stream_status === constants.streamStatus.LIVE) {
       logger.info('[LiveStream %s] [Provider %s] Ending provider stream...', liveStream.id, channel.identifier);
       await provider.endLiveStream(providerStream);
@@ -55,18 +59,26 @@ exports.listLiveStreams = async (user, options) => queries.list(LiveStream, {use
 
 exports.getLiveStream = async (id, options) => queries.get(LiveStream, id, options);
 
-exports.createLiveStream = async (user, title, description) => {
+exports.createLiveStream = async (user, title, description, channels) => {
+  console.log(channels)
+
   logger.info('[User %s] Creating live stream...', user.id);
   const loadedUser = await queries.get(User, user.id);
   const connectedChannels = await queries.list(ConnectedChannel, {user: loadedUser.id}, {populate: 'channel'});
   if (_.isEmpty(connectedChannels)) {
     throw errors.apiError('no_channels_connected', 'No channels connected');
   }
+  const filteredChannels = connectedChannels.filter((connectedChannel) => {
+    return channels.includes(connectedChannel.channel.identifier);
+  });
+  if (_.isEmpty(filteredChannels)) {
+    throw errors.apiError('no_connected_channels_enabled', 'No connected channels enabled');
+  }
   const finalTitle = title || `Live with ${loadedUser.full_name}`;
   const finalDescription = description || 'Live stream provided by LiveStream';
   const startDate = new Date();
   const promises = [];
-  connectedChannels.forEach((connectedChannel) => {
+  filteredChannels.forEach((connectedChannel) => {
     promises.push(createProviderStream(loadedUser, connectedChannel, finalTitle, finalDescription, startDate));
   });
   const providers = await Promise.all(promises);

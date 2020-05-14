@@ -5,7 +5,7 @@ const helpers = require('routes/helpers');
 const streamService = require('services/stream');
 
 async function createLiveStream(req, res) {
-  const liveStream = await streamService.createLiveStream(req.user, req.body.title, req.body.description);
+  const liveStream = await streamService.createLiveStream(req.user, req.body.title, req.body.description, req.body.channels);
   res.json(liveStream);
 }
 

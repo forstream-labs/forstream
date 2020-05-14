@@ -15,7 +15,7 @@ function buildPopulate(populateStr) {
     let currentPath = null;
     populatePath.split('.').forEach((field) => {
       currentPath = currentPath ? `${currentPath}.populate[${field}]` : field;
-      _.set(populateTree, currentPath, {path: field, select: []});
+      _.set(populateTree, currentPath, {path: field.replace(/->/g, '.'), select: []});
     });
     populateTrees.push(populateTree);
   });
