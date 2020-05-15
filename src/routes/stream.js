@@ -9,6 +9,11 @@ async function createLiveStream(req, res) {
   res.json(liveStream);
 }
 
+async function getLiveStream(req, res) {
+  const liveStream = await streamService.getLiveStream(req.live_stream.id, helpers.getOptions(req));
+  res.json(liveStream);
+}
+
 async function startLiveStream(req, res) {
   const liveStream = await streamService.startLiveStream(req.live_stream);
   res.json(liveStream);
@@ -23,6 +28,7 @@ module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
   router.post('', userAuthenticated, helpers.baseCallback(createLiveStream));
+  router.get('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(getLiveStream));
   router.post('/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
   router.post('/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
 

@@ -5,7 +5,9 @@ const _ = require('lodash');
 
 function throwNotFoundIfNeeded(model, obj, options) {
   if (!obj && options.require) {
-    throw errors.notFoundError(`${_.snakeCase(model.constructor.modelName)}_not_found`, `${model.constructor.modelName} not found`);
+    // eslint-disable-next-line new-cap
+    const {modelName} = new model().constructor;
+    throw errors.notFoundError(`${_.snakeCase(modelName)}_not_found`, `${modelName} not found`);
   }
 }
 

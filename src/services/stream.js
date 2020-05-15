@@ -38,6 +38,8 @@ async function startProviderStream(liveStream, providerStream) {
       logger.info('[LiveStream %s] [Provider %s] Starting provider stream...', liveStream.id, channel.identifier);
       await provider.startLiveStream(providerStream);
       logger.info('[LiveStream %s] [Provider %s] Provider stream started!', liveStream.id, channel.identifier);
+    } else {
+      logger.info('[LiveStream %s] [Provider %s] Provider stream is NOT ready!', liveStream.id, channel.identifier);
     }
   }
 }
@@ -51,6 +53,8 @@ async function endProviderStream(liveStream, providerStream) {
       logger.info('[LiveStream %s] [Provider %s] Ending provider stream...', liveStream.id, channel.identifier);
       await provider.endLiveStream(providerStream);
       logger.info('[LiveStream %s] [Provider %s] Provider stream ended!', liveStream.id, channel.identifier);
+    } else {
+      logger.info('[LiveStream %s] [Provider %s] Provider stream is NOT live!', liveStream.id, channel.identifier);
     }
   }
 }
