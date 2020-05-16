@@ -24,6 +24,16 @@ async function endLiveStream(req, res) {
   res.json(liveStream);
 }
 
+async function enableLiveStreamProvider(req, res) {
+  const liveStream = await streamService.enableLiveStreamProvider(req.live_stream, req.params.channel);
+  res.json(liveStream);
+}
+
+async function disableLiveStreamProvider(req, res) {
+  const liveStream = await streamService.disableLiveStreamProvider(req.live_stream, req.params.channel);
+  res.json(liveStream);
+}
+
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
@@ -31,6 +41,8 @@ module.exports = (express, app) => {
   router.get('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(getLiveStream));
   router.post('/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
   router.post('/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
+  router.post('/:live_stream/providers/:channel/enable', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(enableLiveStreamProvider));
+  router.post('/:live_stream/providers/:channel/disable', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(disableLiveStreamProvider));
 
   app.use('/streams', router);
 };

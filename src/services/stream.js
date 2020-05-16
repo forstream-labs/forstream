@@ -59,7 +59,34 @@ async function endProviderStream(liveStream, providerStream) {
   }
 }
 
-exports.listLiveStreams = async (user, options) => queries.list(LiveStream, {user: user.id}, options);
+async function changeLiveStreamProviderState(liveStream, channel, enabled) {
+  logger.info('[LiveStream %s] %s provider %s...', liveStream.id, enabled ? 'Enabling' : 'Disabling', channel);
+  const promises = [];
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
+    populate: {
+      path: 'providers.connected_channel', populate: 'channel',
+    },
+  });
+  if (loadedLiveStream.status === constants.streamStatus.COMPLETE) {
+    throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
+  }
+  const providerStream = loadedLiveStream.providers.find((currentProvider) => currentProvider.connected_channel.channel.identifier === channel);
+  if (!providerStream) {
+    throw errors.apiError('provider_stream_not_found', 'Provider stream not found');
+  }
+  providerStream.set({enabled});
+  await loadedLiveStream.save();
+  logger.info('[LiveStream %s] Provider %s %s!', loadedLiveStream.id, channel, enabled ? 'enabled' : 'disabled');
+  return loadedLiveStream;
+};
+
+exports.listLiveStreams = async (user, options) => {
+  const finalOptions = options || {};
+  if (!finalOptions.sort) {
+    finalOptions.sort = {registration_date: 'desc'};
+  }
+  return queries.list(LiveStream, {user: user.id}, finalOptions);
+};
 
 exports.getLiveStream = async (id, options) => queries.get(LiveStream, id, options);
 
@@ -80,10 +107,9 @@ exports.createLiveStream = async (user, title, description, channels) => {
   }
   const finalTitle = title || `Live with ${loadedUser.full_name}`;
   const finalDescription = description || 'Live stream provided by LiveStream';
-  const startDate = new Date();
   const promises = [];
   filteredChannels.forEach((connectedChannel) => {
-    promises.push(createProviderStream(loadedUser, connectedChannel, finalTitle, finalDescription, startDate));
+    promises.push(createProviderStream(loadedUser, connectedChannel, finalTitle, finalDescription, new Date()));
   });
   const providers = await Promise.all(promises);
   const liveStream = new LiveStream({
@@ -92,7 +118,6 @@ exports.createLiveStream = async (user, title, description, channels) => {
     description: finalDescription,
     status: constants.streamStatus.READY,
     providers: providers.filter((provider) => provider !== null),
-    start_date: startDate,
     registration_date: new Date(),
   });
   await liveStream.save();
@@ -115,7 +140,10 @@ exports.startLiveStream = async (liveStream) => {
     promises.push(startProviderStream(liveStream, providerStream));
   });
   await Promise.all(promises);
-  loadedLiveStream.set({status: constants.streamStatus.LIVE});
+  loadedLiveStream.set({
+    status: constants.streamStatus.LIVE,
+    start_date: new Date(),
+  });
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream started!', loadedLiveStream.id);
   return loadedLiveStream;
@@ -136,8 +164,19 @@ exports.endLiveStream = async (liveStream) => {
     promises.push(endProviderStream(liveStream, providerStream));
   });
   await Promise.all(promises);
-  loadedLiveStream.set({status: constants.streamStatus.COMPLETE});
+  loadedLiveStream.set({
+    status: constants.streamStatus.COMPLETE,
+    end_date: new Date(),
+  });
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream ended!', loadedLiveStream.id);
   return loadedLiveStream;
+};
+
+exports.enableLiveStreamProvider = async (liveStream, provider) => {
+  return changeLiveStreamProviderState(liveStream, provider, true);
+};
+
+exports.disableLiveStreamProvider = async (liveStream, provider) => {
+  return changeLiveStreamProviderState(liveStream, provider, false);
 };
