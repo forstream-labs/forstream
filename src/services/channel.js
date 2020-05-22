@@ -2,12 +2,26 @@
 
 const configs = require('configs');
 const googleApi = require('apis/google');
+const facebookApi = require('apis/facebook');
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
 const {Channel, ConnectedChannel, User} = require('models');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 const queries = require('utils/queries');
+const {addSeconds} = require('date-fns');
+const pubSub = require('pubsub-js');
+
+pubSub.subscribe('token_refreshed', async (msg, data) => {
+  const connectedChannel = await queries.get(ConnectedChannel, data.connected_channel.id, {populate: 'channel'});
+  logger.info('[ConnectedChannel %s] Updating access token...', connectedChannel.id);
+  if (connectedChannel.channel.identifier === constants.channel.identifier.YOUTUBE) {
+    connectedChannel.oauth2['access_token'] = data.tokens.access_token;
+    connectedChannel.oauth2['expiry_date'] = new Date(data.tokens.expiry_date);
+  }
+  await connectedChannel.save();
+  logger.info('[ConnectedChannel %s] Access token updated!', connectedChannel.id);
+});
 
 function setupChannels() {
   setTimeout(async () => {
@@ -42,10 +56,7 @@ async function connectChannel(user, identifier, targetId, oauth2) {
       registration_date: new Date(),
     });
   }
-  connectedChannel.set({
-    target_id: targetId,
-    oauth2,
-  });
+  connectedChannel.set({oauth2, target_id: targetId});
   return connectedChannel.save();
 }
 
@@ -57,11 +68,17 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   logger.info('[User %s] Connecting YouTube channel...', user.id);
   const loadedUser = await queries.get(User, user.id);
 
-  logger.info('[User %s] Getting target id...', user.id);
+  logger.info('[User %s] Generating oauth2 config...', user.id);
   const oauth2 = await googleApi.getOauth2(authCode);
+  const oauth2Config = {
+    access_token: oauth2.credentials.access_token,
+    refresh_token: oauth2.credentials.refresh_token,
+    expiry_date: new Date(oauth2.credentials.expiry_date),
+  };
+
+  logger.info('[User %s] Getting target id...', user.id);
   const targetId = await youtubeSP.getTargetId(oauth2);
 
-  const oauth2Config = {access_token: oauth2.credentials.access_token, refresh_token: oauth2.credentials.refresh_token};
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
   logger.info('[User %s] YouTube channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;
@@ -71,10 +88,16 @@ exports.connectFacebookChannel = async (user, accessToken) => {
   logger.info('[User %s] Connecting Facebook channel...', user.id);
   const loadedUser = await queries.get(User, user.id);
 
-  logger.info('[User %s] Getting target id...', user.id);
-  const targetId = await facebookSP.getTargetId(accessToken);
+  logger.info('[User %s] Generating oauth2 config...', user.id);
+  const longLivedAccessToken = await facebookApi.getLongLivedAccessToken(accessToken);
+  const oauth2Config = {
+    access_token: longLivedAccessToken.access_token,
+    expiry_date: addSeconds(new Date(), longLivedAccessToken.expires_in),
+  };
 
-  const oauth2Config = {access_token: accessToken};
+  logger.info('[User %s] Getting target id...', user.id);
+  const targetId = await facebookSP.getTargetId(oauth2Config.access_token);
+
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
   logger.info('[User %s] Facebook channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;

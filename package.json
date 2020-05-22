@@ -44,6 +44,7 @@
     "mkdirp": "1.0.4",
     "mongoose": "5.9.10",
     "morgan": "1.10.0",
+    "pubsub-js": "1.8.0",
     "redis": "3.0.2",
     "rimraf": "3.0.2",
     "sharp": "0.25.2",

@@ -40,10 +40,7 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
 };
 
 exports.startLiveStream = async (providerStream) => {
-  providerStream.set({
-    stream_status: constants.streamStatus.LIVE,
-    messages: [],
-  });
+  providerStream.set({stream_status: constants.streamStatus.LIVE, messages: []});
 };
 
 exports.endLiveStream = async (providerStream) => {

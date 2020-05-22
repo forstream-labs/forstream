@@ -17,6 +17,7 @@ const Channel = new Schema({
 const Oauth2Config = new Schema({
   access_token: {type: String, required: true},
   refresh_token: {type: String},
+  expiry_date: {type: Date},
 }, {_id: false});
 
 const ConnectedChannel = new Schema({
