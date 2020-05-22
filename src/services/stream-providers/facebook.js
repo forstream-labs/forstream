@@ -27,6 +27,8 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
   } catch (err) {
     const {error} = err.response;
     return {
+      broadcast_id: null,
+      stream_url: null,
       stream_status: constants.streamStatus.ERROR,
       messages: [{
         type: constants.providerMessage.type.ERROR,
@@ -38,14 +40,31 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
 };
 
 exports.startLiveStream = async (providerStream) => {
-  providerStream.set({stream_status: constants.streamStatus.LIVE});
+  providerStream.set({
+    stream_status: constants.streamStatus.LIVE,
+    messages: [],
+  });
 };
 
 exports.endLiveStream = async (providerStream) => {
-  const accessToken = providerStream.connected_channel.oauth2.access_token;
-  await facebookApi.api(`${providerStream.broadcast_id}`, 'POST', {
-    end_live_video: true,
-    access_token: accessToken,
-  });
-  providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+  try {
+    const accessToken = providerStream.connected_channel.oauth2.access_token;
+    await facebookApi.api(`${providerStream.broadcast_id}`, 'POST', {
+      end_live_video: true,
+      access_token: accessToken,
+    });
+    providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+  } catch (err) {
+    // Nothing to do...
+  }
+};
+
+exports.isActiveLiveStream = async (providerStream) => {
+  try {
+    const accessToken = providerStream.connected_channel.oauth2.access_token;
+    const broadcast = await facebookApi.api(`${providerStream.broadcast_id}`, 'GET', {access_token: accessToken});
+    return broadcast && broadcast.status !== 'VOD';
+  } catch (err) {
+    return false;
+  }
 };

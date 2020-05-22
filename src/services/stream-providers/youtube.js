@@ -3,6 +3,7 @@
 const googleApi = require('apis/google');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
+const _ = require('lodash');
 
 const youtubeApi = googleApi.youtube;
 
@@ -96,22 +97,49 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
     });
     return {
       messages,
+      broadcast_id: null,
+      stream_url: null,
       stream_status: constants.streamStatus.ERROR,
     };
   }
 };
 
 exports.startLiveStream = async (providerStream) => {
-  providerStream.set({stream_status: constants.streamStatus.LIVE});
+  providerStream.set({
+    stream_status: constants.streamStatus.LIVE,
+    messages: [],
+  });
 };
 
 exports.endLiveStream = async (providerStream) => {
-  const auth = googleApi.getOauth2WithTokens(providerStream.connected_channel.oauth2);
-  await youtubeApi.liveBroadcasts.transition({
-    auth,
-    id: providerStream.broadcast_id,
-    broadcastStatus: 'complete',
-    part: 'id,snippet,contentDetails,status',
-  });
-  providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+  try {
+    const auth = googleApi.getOauth2WithTokens(providerStream.connected_channel.oauth2);
+    await youtubeApi.liveBroadcasts.transition({
+      auth,
+      id: providerStream.broadcast_id,
+      broadcastStatus: 'complete',
+      part: 'id,snippet,contentDetails,status',
+    });
+    providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+  } catch (err) {
+    // Nothing to do...
+  }
+};
+
+exports.isActiveLiveStream = async (providerStream) => {
+  try {
+    const auth = googleApi.getOauth2WithTokens(providerStream.connected_channel.oauth2);
+    const broadcasts = await youtubeApi.liveBroadcasts.list({
+      auth,
+      part: 'id,snippet,contentDetails,status',
+      id: providerStream.broadcast_id,
+    });
+    if (_.isEmpty(broadcasts.data.items)) {
+      return false;
+    }
+    const invalidStatuses = ['complete', 'revoked'];
+    return !invalidStatuses.includes(broadcasts.data.items[0].status);
+  } catch (err) {
+    return false;
+  }
 };

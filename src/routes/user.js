@@ -5,7 +5,6 @@ const helpers = require('routes/helpers');
 const channelService = require('services/channel');
 const streamService = require('services/stream');
 const userService = require('services/user');
-const errors = require('utils/errors');
 const session = require('utils/session');
 
 // Users

@@ -12,6 +12,7 @@ const User = new Schema({
   google_id: {type: String},
   registration_date: {type: Date, required: true},
 }, {collection: 'users'});
+// eslint-disable-next-line func-names
 User.virtual('full_name').get(function () {
   return `${this.first_name} ${this.last_name}`;
 });

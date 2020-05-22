@@ -63,19 +63,6 @@ async function uploadFile(sourcePath, file, options, publicMode) {
   return `${configs.publicUrl}/${relativePath}`;
 }
 
-async function deleteFile(file, publicMode) {
-  if (configs.env === constants.environment.PRODUCTION) {
-    const bucket = publicMode ? configs.publicS3Bucket : configs.privateS3Bucket;
-    const key = path.join(file.relativeDir, file.name);
-    await s3.deleteObject({
-      Bucket: bucket,
-      Key: key,
-    }).promise();
-  } else {
-    await rimraf(path.join(configs.publicPath, file.relativeDir));
-  }
-}
-
 exports.uploadUserImage = async (user, imagePath) => {
   const file = {
     name: `image_${Date.now()}.png`,
