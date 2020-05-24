@@ -19,6 +19,11 @@ async function connectFacebookChannel(req, res) {
   res.json(connectedChannel);
 }
 
+async function disconnectChannel(req, res) {
+  await channelService.disconnectChannel(req.user, req.params.channel);
+  res.json({});
+}
+
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
@@ -26,6 +31,7 @@ module.exports = (express, app) => {
 
   router.post('/youtube/connect', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
   router.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
+  router.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
 
   app.use('/channels', router);
 };

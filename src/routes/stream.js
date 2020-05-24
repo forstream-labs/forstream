@@ -9,6 +9,11 @@ async function createLiveStream(req, res) {
   res.json(liveStream);
 }
 
+async function removeLiveStream(req, res) {
+  await streamService.removeLiveStream(req.live_stream);
+  res.json({});
+}
+
 async function getLiveStream(req, res) {
   const liveStream = await streamService.getLiveStream(req.live_stream.id, helpers.getOptions(req));
   res.json(liveStream);
@@ -39,6 +44,7 @@ module.exports = (express, app) => {
 
   router.post('', userAuthenticated, helpers.baseCallback(createLiveStream));
   router.get('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(getLiveStream));
+  router.delete('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(removeLiveStream));
   router.post('/:live_stream/start', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(startLiveStream));
   router.post('/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
   router.post('/:live_stream/providers/:channel/enable', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(enableLiveStreamProvider));

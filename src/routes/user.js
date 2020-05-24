@@ -46,7 +46,7 @@ async function signOut(req, res) {
   if (req.token) {
     await session.destroyToken(req.token);
   }
-  res.json();
+  res.json({});
 }
 
 module.exports = (express, app) => {

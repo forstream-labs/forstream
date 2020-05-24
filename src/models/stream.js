@@ -20,7 +20,7 @@ const ProviderStream = new Schema({
   stream_url: {type: String},
   stream_status: {type: String, enum: _.values(constants.streamStatus), required: true},
   messages: [ProviderMessage],
-}, {_id: false});
+});
 
 const LiveStream = new Schema({
   user: {type: ObjectId, ref: 'User', required: true, index: true},

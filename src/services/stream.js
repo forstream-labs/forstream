@@ -134,6 +134,13 @@ exports.createLiveStream = async (user, title, description, channels) => {
   return liveStream;
 };
 
+exports.removeLiveStream = async (liveStream) => {
+  logger.info('[LiveStream %s] Removing live stream...', liveStream.id);
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id);
+  await loadedLiveStream.remove();
+  logger.info('[LiveStream %s] Live stream removed!', loadedLiveStream.id);
+};
+
 exports.startLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Starting live stream...', liveStream.id);
   const promises = [];

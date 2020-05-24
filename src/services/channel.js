@@ -5,7 +5,7 @@ const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
-const {Channel, ConnectedChannel, User} = require('models');
+const {Channel, ConnectedChannel, LiveStream, User} = require('models');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 const queries = require('utils/queries');
@@ -16,8 +16,10 @@ pubSub.subscribe('token_refreshed', async (msg, data) => {
   const connectedChannel = await queries.get(ConnectedChannel, data.connected_channel.id, {populate: 'channel'});
   logger.info('[ConnectedChannel %s] Updating access token...', connectedChannel.id);
   if (connectedChannel.channel.identifier === constants.channel.identifier.YOUTUBE) {
-    connectedChannel.oauth2['access_token'] = data.tokens.access_token;
-    connectedChannel.oauth2['expiry_date'] = new Date(data.tokens.expiry_date);
+    connectedChannel.oauth2.set({
+      access_token: data.tokens.access_token,
+      expiry_date: new Date(data.tokens.expiry_date),
+    });
   }
   await connectedChannel.save();
   logger.info('[ConnectedChannel %s] Access token updated!', connectedChannel.id);
@@ -101,6 +103,18 @@ exports.connectFacebookChannel = async (user, accessToken) => {
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
   logger.info('[User %s] Facebook channel %s connected!', loadedUser.id, connectedChannel.id);
   return connectedChannel;
+};
+
+exports.disconnectChannel = async (user, channel) => {
+  const loadedChannel = await queries.find(Channel, {identifier: channel});
+  const connectedChannel = await queries.find(ConnectedChannel, {user: user.id, channel: loadedChannel.id});
+  const liveStreams = await queries.list(LiveStream, {'providers.connected_channel': connectedChannel.id});
+  liveStreams.forEach(async (liveStream) => {
+    const providerStream = liveStream.providers.find((provider) => provider.connected_channel.toString() === connectedChannel.id);
+    liveStream.providers.id(providerStream.id).remove();
+    await liveStream.save();
+  });
+  await connectedChannel.remove();
 };
 
 setupChannels();
