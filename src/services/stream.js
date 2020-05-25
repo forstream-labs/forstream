@@ -22,6 +22,7 @@ async function createProviderStream(user, connectedChannel, title, description, 
     logger.info('[User %s] [Provider %s] Stream created!', user.id, channel.identifier);
     return {
       ...streamData,
+      channel,
       connected_channel: connectedChannel,
       enabled: true,
     };
@@ -30,8 +31,8 @@ async function createProviderStream(user, connectedChannel, title, description, 
 }
 
 async function startProviderStream(liveStream, providerStream) {
+  const {channel} = providerStream;
   const connectedChannel = providerStream.connected_channel;
-  const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && providerStream.enabled) {
     const activeLiveStream = await provider.isActiveLiveStream(providerStream);
@@ -59,8 +60,8 @@ async function startProviderStream(liveStream, providerStream) {
 }
 
 async function endProviderStream(liveStream, providerStream) {
+  const {channel} = providerStream;
   const connectedChannel = providerStream.connected_channel;
-  const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && providerStream.enabled) {
     if (providerStream.stream_status === constants.streamStatus.LIVE) {
@@ -75,11 +76,7 @@ async function endProviderStream(liveStream, providerStream) {
 
 async function changeLiveStreamProviderState(liveStream, channel, enabled) {
   logger.info('[LiveStream %s] %s provider %s...', liveStream.id, enabled ? 'Enabling' : 'Disabling', channel);
-  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
-    populate: {
-      path: 'providers.connected_channel', populate: 'channel',
-    },
-  });
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
   if (loadedLiveStream.status === constants.streamStatus.COMPLETE) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
@@ -145,11 +142,7 @@ exports.removeLiveStream = async (liveStream) => {
 exports.startLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Starting live stream...', liveStream.id);
   const promises = [];
-  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
-    populate: {
-      path: 'providers.connected_channel', populate: 'channel',
-    },
-  });
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
   if (loadedLiveStream.status === constants.streamStatus.COMPLETE) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
@@ -167,11 +160,7 @@ exports.startLiveStream = async (liveStream) => {
 exports.endLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Ending live stream...', liveStream.id);
   const promises = [];
-  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {
-    populate: {
-      path: 'providers.connected_channel', populate: 'channel',
-    },
-  });
+  const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
   if (loadedLiveStream.status !== constants.streamStatus.LIVE) {
     throw errors.apiError('live_stream_not_live', 'Live stream is not live');
   }

@@ -111,7 +111,11 @@ exports.disconnectChannel = async (user, channel) => {
   const liveStreams = await queries.list(LiveStream, {'providers.connected_channel': connectedChannel.id});
   liveStreams.forEach(async (liveStream) => {
     const providerStream = liveStream.providers.find((provider) => provider.connected_channel.toString() === connectedChannel.id);
-    liveStream.providers.id(providerStream.id).remove();
+    if (providerStream.stream_status === constants.streamStatus.COMPLETE) {
+      providerStream.set({connected_channel: null});
+    } else {
+      providerStream.remove();
+    }
     await liveStream.save();
   });
   await connectedChannel.remove();

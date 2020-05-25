@@ -14,7 +14,8 @@ const ProviderMessage = new Schema({
 }, {_id: false});
 
 const ProviderStream = new Schema({
-  connected_channel: {type: ObjectId, ref: 'ConnectedChannel', required: true, index: true},
+  channel: {type: ObjectId, ref: 'Channel', required: true, index: true},
+  connected_channel: {type: ObjectId, ref: 'ConnectedChannel', index: true},
   enabled: {type: Boolean, required: true},
   broadcast_id: {type: String},
   stream_url: {type: String},
