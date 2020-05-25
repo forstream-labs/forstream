@@ -1,16 +1,30 @@
 'use strict';
 
+const configs = require('configs');
 const {userAuthenticated} = require('routes/middlewares');
 const helpers = require('routes/helpers');
 const channelService = require('services/channel');
 const streamService = require('services/stream');
 const userService = require('services/user');
 const session = require('utils/session');
+const multer = require('multer');
+
+const upload = multer({dest: configs.uploadsPath});
 
 // Users
 
 async function getMyUser(req, res) {
   const user = await userService.getUser(req.user.id, helpers.getOptions(req));
+  res.json(user);
+}
+
+async function updateMyUser(req, res) {
+  const user = await userService.updateUser(req.user, req.body);
+  res.json(user);
+}
+
+async function updateMyUserImage(req, res) {
+  const user = await userService.updateUserImage(req.user, req.file.path);
   res.json(user);
 }
 
@@ -53,6 +67,8 @@ module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
 
   router.get('/me', userAuthenticated, helpers.baseCallback(getMyUser));
+  router.put('/me', userAuthenticated, helpers.baseCallback(updateMyUser));
+  router.put('/me/images', [userAuthenticated, upload.single('image')], helpers.baseCallback(updateMyUserImage));
   router.get('/me/channels', userAuthenticated, helpers.baseCallback(listMyConnectedChannels));
   router.get('/me/streams', userAuthenticated, helpers.baseCallback(listMyLiveStreams));
 

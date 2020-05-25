@@ -105,6 +105,9 @@ exports.getLiveStream = async (id, options) => queries.get(LiveStream, id, optio
 
 exports.createLiveStream = async (user, title, description, channels) => {
   logger.info('[User %s] Creating live stream...', user.id);
+  if (!title) {
+    throw errors.apiError('title_required', 'Title is required');
+  }
   const loadedUser = await queries.get(User, user.id);
   const connectedChannels = await queries.list(ConnectedChannel, {user: loadedUser.id}, {populate: 'channel'});
   if (_.isEmpty(connectedChannels)) {
@@ -114,17 +117,15 @@ exports.createLiveStream = async (user, title, description, channels) => {
   if (_.isEmpty(filteredChannels)) {
     throw errors.apiError('no_connected_channels_enabled', 'No connected channels enabled');
   }
-  const finalTitle = title || `Live with ${loadedUser.full_name}`;
-  const finalDescription = description || 'Live stream provided by LiveStream';
   const promises = [];
   filteredChannels.forEach((connectedChannel) => {
-    promises.push(createProviderStream(loadedUser, connectedChannel, finalTitle, finalDescription, new Date()));
+    promises.push(createProviderStream(loadedUser, connectedChannel, title, description, new Date()));
   });
   const providers = await Promise.all(promises);
   const liveStream = new LiveStream({
+    title,
+    description,
     user: loadedUser,
-    title: finalTitle,
-    description: finalDescription,
     status: constants.streamStatus.READY,
     providers: providers.filter((provider) => provider !== null),
     registration_date: new Date(),

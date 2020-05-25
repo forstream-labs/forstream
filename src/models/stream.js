@@ -25,7 +25,7 @@ const ProviderStream = new Schema({
 const LiveStream = new Schema({
   user: {type: ObjectId, ref: 'User', required: true, index: true},
   title: {type: String, required: true},
-  description: {type: String, required: true},
+  description: {type: String},
   status: {type: String, enum: _.values(constants.streamStatus), required: true},
   providers: {type: [ProviderStream], required: true},
   start_date: {type: Date},

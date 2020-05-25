@@ -3,13 +3,46 @@
 const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
 const {User} = require('models');
+const errors = require('utils/errors');
 const files = require('utils/files');
 const logger = require('utils/logger');
 const queries = require('utils/queries');
+const _ = require('lodash');
 
 const oauth2Api = googleApi.oauth2;
 
+const ALLOWED_ATTRS_TO_UPDATE = ['first_name', 'last_name', 'email'];
+
+function validateUser(user) {
+  if (!user.first_name || _.isEmpty(user.first_name)) {
+    throw errors.apiError('first_name_required', 'First name required');
+  }
+  if (!user.last_name || _.isEmpty(user.last_name)) {
+    throw errors.apiError('last_name_required', 'Last name required');
+  }
+  if (!user.email || _.isEmpty(user.email)) {
+    throw errors.apiError('email_required', 'Email required');
+  }
+}
+
 exports.getUser = async (id, options) => queries.get(User, id, options);
+
+exports.updateUser = async (user, data) => {
+  console.log(data)
+  const attrs = _.pick(data, ALLOWED_ATTRS_TO_UPDATE);
+  const loadedUser = await queries.get(User, user.id);
+  loadedUser.set(attrs);
+  console.log(loadedUser)
+  validateUser(loadedUser);
+  return loadedUser.save();
+};
+
+exports.updateUserImage = async (user, imagePath) => {
+  const loadedUser = await queries.get(User, user.id);
+  const imageUrl = await files.uploadUserImage(loadedUser, imagePath);
+  loadedUser.image_url = imageUrl;
+  return loadedUser.save();
+};
 
 exports.signInWithGoogle = async (authCode) => {
   logger.info('Signing in with Google...');
