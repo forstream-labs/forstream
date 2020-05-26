@@ -18,11 +18,11 @@ if (require.main === module) {
   publish.setLintTask(lintProject);
   publish.setDockerProject({
     ecr: {
-      profile: 'livestream',
+      profile: 'forstream',
       region: 'us-east-1',
       repository: {
         url: '870961355790.dkr.ecr.us-east-1.amazonaws.com',
-        namespace: 'livestream',
+        namespace: 'forstream',
       },
     },
   });

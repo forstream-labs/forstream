@@ -1,6 +1,6 @@
 FROM keymetrics/pm2:12-alpine
 
-WORKDIR /usr/src/livestream
+WORKDIR /usr/src/forstream
 
 COPY src src/
 COPY package.json .

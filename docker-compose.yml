@@ -1,14 +1,14 @@
 version: "3"
 services:
-  livestream:
-    image: "livestream:latest"
-    container_name: "livestream"
+  forstream:
+    image: "forstream:latest"
+    container_name: "forstream"
     volumes:
-      - "./configs.yml:/usr/src/livestream/configs.yml"
-      - "./public:/usr/src/livestream/public"
+      - "./configs.yml:/usr/src/forstream/configs.yml"
+      - "./public:/usr/src/forstream/public"
     ports:
       - "3000:3000"
 networks:
   default:
     external:
-      name: "livestream"
+      name: "forstream"

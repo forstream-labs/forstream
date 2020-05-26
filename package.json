@@ -1,18 +1,18 @@
 {
-  "name": "livestream",
-  "description": "Livestream Backend",
+  "name": "forstream",
+  "description": "ForStream Backend",
   "version": "0.0.0",
   "private": true,
-  "homepage": "https://livestream.io",
+  "homepage": "https://forstream.io",
   "author": {
-    "name": "Livestream team",
-    "email": "contact@livestream.io",
-    "url": "https://livestream.io"
+    "name": "ForStream team",
+    "email": "contact@forstream.io",
+    "url": "https://forstream.io"
   },
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node src/app.js",
-    "build": "docker build -t livestream .",
+    "build": "docker build -t forstream .",
     "release-dist": "node tasks/release.js",
     "publish-dist": "node tasks/publish.js"
   },

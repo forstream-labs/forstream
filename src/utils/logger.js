@@ -40,7 +40,7 @@ const fileLogger = winston.createLogger({
   ),
   transports: [
     new transports.File({
-      filename: path.resolve('livestream.log'),
+      filename: path.resolve('forstream.log'),
       handleExceptions: true,
     }),
   ],

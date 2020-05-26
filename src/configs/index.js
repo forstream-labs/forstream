@@ -23,7 +23,7 @@ function getRequired(property) {
 exports.env = get('app.env', constants.environment.DEVELOPMENT);
 exports.port = get('app.port', 3000);
 exports.debug = get('app.debug', false);
-exports.domain = 'livestream.io';
+exports.domain = 'forstream.io';
 
 exports.serverUrl = this.env === constants.environment.PRODUCTION ? `https://api.${this.domain}` : `http://${get('app.host', 'localhost')}:${this.port}`;
 exports.websiteUrl = `https://www.${this.domain}`;
@@ -34,10 +34,10 @@ exports.publicPath = get('app.publicPath', path.resolve('public'));
 exports.uploadsUrl = `${this.serverUrl}/uploads`;
 exports.uploadsPath = path.join(this.publicPath, 'uploads');
 
-exports.publicS3Bucket = 'livestream-public';
+exports.publicS3Bucket = 'forstream-public';
 exports.publicCDNUrl = `https://cdn.${this.domain}`;
 
-exports.privateS3Bucket = 'livestream-private';
+exports.privateS3Bucket = 'forstream-private';
 exports.privateCDNUrl = `https://cdn-private.${this.domain}`;
 
 exports.session = {
@@ -50,7 +50,7 @@ exports.session = {
 exports.mongo = {
   host: get('mongo.host', 'localhost'),
   port: get('mongo.port', 27017),
-  schema: get('mongo.schema', 'livestream'),
+  schema: get('mongo.schema', 'forstream'),
   options: get('mongo.options', ''),
   cert: get('mongo.cert'),
   username: get('mongo.username'),
