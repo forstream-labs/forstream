@@ -45,5 +45,5 @@ logger.info(`Debug mode is ${configs.debug ? 'ON' : 'OFF'}`);
 routes.configure(express, app);
 
 app.listen(app.get('port'), () => {
-  logger.info(`ForStream Backend server is listening on port ${app.get('port')}`);
+  logger.info(`Forstream Backend server is listening on port ${app.get('port')}`);
 });

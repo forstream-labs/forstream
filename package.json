@@ -1,11 +1,11 @@
 {
   "name": "forstream",
-  "description": "ForStream Backend",
+  "description": "Forstream Backend",
   "version": "0.0.0",
   "private": true,
   "homepage": "https://forstream.io",
   "author": {
-    "name": "ForStream team",
+    "name": "Forstream team",
     "email": "contact@forstream.io",
     "url": "https://forstream.io"
   },
