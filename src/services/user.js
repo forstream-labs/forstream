@@ -28,11 +28,9 @@ function validateUser(user) {
 exports.getUser = async (id, options) => queries.get(User, id, options);
 
 exports.updateUser = async (user, data) => {
-  console.log(data)
   const attrs = _.pick(data, ALLOWED_ATTRS_TO_UPDATE);
   const loadedUser = await queries.get(User, user.id);
   loadedUser.set(attrs);
-  console.log(loadedUser)
   validateUser(loadedUser);
   return loadedUser.save();
 };

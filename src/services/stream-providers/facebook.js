@@ -9,7 +9,7 @@ exports.getTargetId = async (auth) => {
   return user.id;
 };
 
-exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
+exports.createLiveStream = async (connectedChannel, title, description) => {
   try {
     const accessToken = connectedChannel.oauth2.access_token;
     logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);

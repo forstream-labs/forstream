@@ -6,7 +6,6 @@ const Promise = require('bluebird');
 const awsSdk = require('aws-sdk');
 const fs = Promise.promisifyAll(require('fs'));
 const mkdirp = require('mkdirp');
-const rimraf = Promise.promisify(require('rimraf'));
 const path = require('path');
 const sharp = require('sharp');
 const axios = require('axios');

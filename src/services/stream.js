@@ -61,7 +61,6 @@ async function startProviderStream(liveStream, providerStream) {
 
 async function endProviderStream(liveStream, providerStream) {
   const {channel} = providerStream;
-  const connectedChannel = providerStream.connected_channel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && providerStream.enabled) {
     if (providerStream.stream_status === constants.streamStatus.LIVE) {
