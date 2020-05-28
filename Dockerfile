@@ -8,14 +8,12 @@ COPY ecosystem.config.js .
 
 ENV NPM_CONFIG_LOGLEVEL warn
 
-RUN \
-  apk add --update --no-cache --virtual .build-deps make gcc g++ python && \
-  apk add --update --no-cache vips-dev fftw-dev build-base \
-    --repository http://dl-cdn.alpinelinux.org/alpine/v3.10/main \
-    --repository http://dl-cdn.alpinelinux.org/alpine/v3.10/community && \
-  npm install --production && \
-  apk del .build-deps && \
-  touch configs.yml
+RUN apk update && apk upgrade && \
+    apk add --update --no-cache --update-cache build-base vips-dev fftw-dev \
+    --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/main \
+    --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community
+
+RUN npm install --production && touch configs.yml
 
 EXPOSE 3000
 
