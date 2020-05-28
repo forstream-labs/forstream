@@ -1,7 +1,7 @@
 {
   "name": "forstream",
   "description": "Forstream Backend",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "homepage": "https://forstream.io",
   "author": {
