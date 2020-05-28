@@ -77,6 +77,11 @@ exports.facebook = {
   appSecret: getRequired('facebook.appSecret'),
 };
 
+exports.aws = {
+  keyId: get('aws.keyId'),
+  secret: get('aws.secret'),
+};
+
 mkdirp.sync(this.publicPath);
 mkdirp.sync(this.uploadsPath);
 
