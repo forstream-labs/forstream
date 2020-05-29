@@ -28,6 +28,9 @@ exports.domain = 'forstream.io';
 exports.serverUrl = this.env === constants.environment.PRODUCTION ? `https://api.${this.domain}` : `http://${get('app.host', 'localhost')}:${this.port}`;
 exports.websiteUrl = `https://www.${this.domain}`;
 
+exports.assetsUrl = `${this.serverUrl}/assets`;
+exports.assetsPath = get('app.assetsPath', path.resolve('assets'));
+
 exports.publicUrl = `${this.serverUrl}/public`;
 exports.publicPath = get('app.publicPath', path.resolve('public'));
 

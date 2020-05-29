@@ -24,6 +24,7 @@ app.set('env', configs.env);
 app.set('port', configs.port);
 
 app.use(cors());
+app.use('/assets', express.static(configs.assetsPath));
 app.use('/public', express.static(configs.publicPath));
 app.use(morgan('tiny', {stream: {write: (message) => logger.console.debug(message)}}));
 app.use(bodyParser.json({

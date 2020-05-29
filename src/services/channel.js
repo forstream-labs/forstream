@@ -32,7 +32,7 @@ function setupChannels() {
       await new Channel({
         name: 'YouTube',
         identifier: constants.channel.identifier.YOUTUBE,
-        image_url: `${configs.publicUrl}/channels/youtube.png`,
+        image_url: `${configs.assetsUrl}/channels/youtube.png`,
         registration_date: new Date(),
       }).save();
     }
@@ -41,7 +41,7 @@ function setupChannels() {
       await new Channel({
         name: 'Facebook',
         identifier: constants.channel.identifier.FACEBOOK,
-        image_url: `${configs.publicUrl}/channels/facebook.png`,
+        image_url: `${configs.assetsUrl}/channels/facebook.png`,
         registration_date: new Date(),
       }).save();
     }
