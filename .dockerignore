@@ -9,6 +9,7 @@
 /Dockerfile
 /node_modules
 /npm-debug.log
-/public
+/public/uploads
+/public/users
 /tasks
 /forstream.log

@@ -1,6 +1,6 @@
 'use strict';
 
-const {userAuthenticated} = require('routes/middlewares');
+const {connectedChannelBelongsToUser, userAuthenticated} = require('routes/middlewares');
 const helpers = require('routes/helpers');
 const channelService = require('services/channel');
 
@@ -24,14 +24,20 @@ async function disconnectChannel(req, res) {
   res.json({});
 }
 
+async function getConnectedChannel(req, res) {
+  const connectedChannel = await channelService.getConnectedChannel(req.params.connected_channel, helpers.getOptions(req));
+  res.json(connectedChannel);
+}
+
 module.exports = (express, app) => {
-  const router = express.Router({mergeParams: true});
+  const channelsRouter = express.Router({mergeParams: true});
+  channelsRouter.get('', userAuthenticated, helpers.baseCallback(listChannels));
+  channelsRouter.post('/youtube/connect', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
+  channelsRouter.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
+  channelsRouter.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
+  app.use('/channels', channelsRouter);
 
-  router.get('', userAuthenticated, helpers.baseCallback(listChannels));
-
-  router.post('/youtube/connect', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
-  router.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
-  router.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
-
-  app.use('/channels', router);
+  const connectedChannelsRouter = express.Router({mergeParams: true});
+  connectedChannelsRouter.get('/:connected_channel', [userAuthenticated, connectedChannelBelongsToUser], helpers.baseCallback(getConnectedChannel));
+  app.use('/connected_channels', connectedChannelsRouter);
 };

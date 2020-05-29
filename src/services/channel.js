@@ -121,4 +121,6 @@ exports.disconnectChannel = async (user, channel) => {
   await connectedChannel.remove();
 };
 
+exports.getConnectedChannel = async (id, options) => queries.get(ConnectedChannel, id, options);
+
 setupChannels();

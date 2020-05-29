@@ -1,6 +1,7 @@
 'use strict';
 
-const liveStreamService = require('services/stream');
+const channelService = require('services/channel');
+const streamService = require('services/stream');
 const errors = require('utils/errors');
 const logger = require('utils/logger');
 const session = require('utils/session');
@@ -37,13 +38,31 @@ exports.userAuthenticated = async (req, res, next) => {
   }
 };
 
+exports.connectedChannelBelongsToUser = async (req, res, next) => {
+  try {
+    const connectedChannelId = getId(req, 'connected_channel');
+    if (!connectedChannelId) {
+      throw errors.permissionDeniedError();
+    }
+    const connectedChannel = await channelService.getConnectedChannel(connectedChannelId);
+    if (connectedChannel.user.toString() !== req.user.id) {
+      throw errors.permissionDeniedError();
+    }
+    req.connected_channel = connectedChannel;
+    next();
+  } catch (err) {
+    logger.error(err);
+    errors.respondWithError(res, err);
+  }
+};
+
 exports.liveStreamBelongsToUser = async (req, res, next) => {
   try {
     const liveStreamId = getId(req, 'live_stream');
     if (!liveStreamId) {
       throw errors.permissionDeniedError();
     }
-    const liveStream = await liveStreamService.getLiveStream(liveStreamId);
+    const liveStream = await streamService.getLiveStream(liveStreamId);
     if (liveStream.user.toString() !== req.user.id) {
       throw errors.permissionDeniedError();
     }

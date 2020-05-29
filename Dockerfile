@@ -3,6 +3,7 @@ FROM keymetrics/pm2:12-alpine
 WORKDIR /usr/src/forstream
 
 COPY src src/
+COPY public/channels public/channels/
 COPY package.json .
 COPY ecosystem.config.js .
 

@@ -65,16 +65,13 @@ async function signOut(req, res) {
 
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
-
   router.get('/me', userAuthenticated, helpers.baseCallback(getMyUser));
   router.put('/me', userAuthenticated, helpers.baseCallback(updateMyUser));
   router.put('/me/images', [userAuthenticated, upload.single('image')], helpers.baseCallback(updateMyUserImage));
   router.get('/me/channels', userAuthenticated, helpers.baseCallback(listMyConnectedChannels));
   router.get('/me/streams', userAuthenticated, helpers.baseCallback(listMyLiveStreams));
-
   router.post('/sign_in/google', helpers.baseCallback(signInWithGoogle));
   router.post('/sign_in/facebook', helpers.baseCallback(signInWithFacebook));
   router.post('/sign_out', userAuthenticated, helpers.baseCallback(signOut));
-
   app.use('/users', router);
 };

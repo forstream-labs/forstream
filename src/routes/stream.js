@@ -41,7 +41,6 @@ async function disableLiveStreamProvider(req, res) {
 
 module.exports = (express, app) => {
   const router = express.Router({mergeParams: true});
-
   router.post('', userAuthenticated, helpers.baseCallback(createLiveStream));
   router.get('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(getLiveStream));
   router.delete('/:live_stream', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(removeLiveStream));
@@ -49,6 +48,5 @@ module.exports = (express, app) => {
   router.post('/:live_stream/end', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(endLiveStream));
   router.post('/:live_stream/providers/:channel/enable', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(enableLiveStreamProvider));
   router.post('/:live_stream/providers/:channel/disable', [userAuthenticated, liveStreamBelongsToUser], helpers.baseCallback(disableLiveStreamProvider));
-
   app.use('/streams', router);
 };
