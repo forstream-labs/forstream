@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node src/app.js",
-    "build": "docker build -t forstream .",
+    "build-image": "docker build -t forstream .",
     "release-dist": "node tasks/release.js",
     "publish-dist": "node tasks/publish.js"
   },
