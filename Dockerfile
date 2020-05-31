@@ -14,7 +14,7 @@ RUN apk update && apk upgrade && \
     --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/main \
     --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community
 
-RUN npm install --production && touch configs.yml
+RUN npm install --production
 
 EXPOSE 3000
 
