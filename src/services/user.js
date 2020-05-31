@@ -20,9 +20,6 @@ function validateUser(user) {
   if (!user.last_name || _.isEmpty(user.last_name)) {
     throw errors.apiError('last_name_required', 'Last name required');
   }
-  if (!user.email || _.isEmpty(user.email)) {
-    throw errors.apiError('email_required', 'Email required');
-  }
 }
 
 exports.getUser = async (id, options) => queries.get(User, id, options);
@@ -50,19 +47,21 @@ exports.signInWithGoogle = async (authCode) => {
   const profile = await oauth2Api.userinfo.get({auth: oauth2});
   logger.debug('[GoogleId %s] Google profile data: %j', profile.data.id, profile.data);
 
-  logger.info('[GoogleId %s] Searching for a user with email %s...', profile.data.id, profile.data.email);
-  let user = await queries.find(User, {email: profile.data.email}, {require: false});
-  if (user) {
-    logger.info('[GoogleId %s] User %s was found, returning it!', profile.data.id, user.id);
-    user.set({google_id: profile.data.id});
-    return user.save();
-  }
-
-  logger.info('[GoogleId %s] No users found, searching by google_id...', profile.data.id);
-  user = await queries.find(User, {google_id: profile.data.id}, {require: false});
+  logger.info('[GoogleId %s] Searching user with google_id...', profile.data.id);
+  let user = await queries.find(User, {google_id: profile.data.id}, {require: false});
   if (user) {
     logger.info('[GoogleId %s] User %s was found, returning it!', profile.data.id, user.id);
     return user;
+  }
+
+  if (profile.data.email) {
+    logger.info('[GoogleId %s] Searching user with email %s...', profile.data.id, profile.data.email);
+    user = await queries.find(User, {email: profile.data.email}, {require: false});
+    if (user) {
+      logger.info('[GoogleId %s] User %s was found, returning it!', profile.data.id, user.id);
+      user.set({google_id: profile.data.id});
+      return user.save();
+    }
   }
 
   logger.info('[GoogleId %s] No users found, creating it...', profile.data.id);
@@ -89,19 +88,21 @@ exports.signInWithFacebook = async (accessToken) => {
   const profile = await facebookApi.api('me', options);
   logger.debug('[FacebookId %s] Facebook profile data: %j', profile.id, profile);
 
-  logger.info('[FacebookId %s] Searching for a user with email %s...', profile.id, profile.email);
-  let user = await queries.find(User, {email: profile.email}, {require: false});
-  if (user) {
-    logger.info('[FacebookId %s] User %s was found, returning it!', profile.id, user.id);
-    user.set({facebook_id: profile.id});
-    return user.save();
-  }
-
-  logger.info('[FacebookId %s] No users found, searching by facebook_id...', profile.id);
-  user = await queries.find(User, {facebook_id: profile.id}, {require: false});
+  logger.info('[FacebookId %s] Searching user with facebook_id...', profile.id);
+  let user = await queries.find(User, {facebook_id: profile.id}, {require: false});
   if (user) {
     logger.info('[FacebookId %s] User %s was found, returning it!', profile.id, user.id);
     return user;
+  }
+
+  if (profile.email) {
+    logger.info('[FacebookId %s] Searching user with email %s...', profile.id, profile.email);
+    user = await queries.find(User, {email: profile.email}, {require: false});
+    if (user) {
+      logger.info('[FacebookId %s] User %s was found, returning it!', profile.id, user.id);
+      user.set({facebook_id: profile.id});
+      return user.save();
+    }
   }
 
   logger.info('[FacebookId %s] No users found, creating it...', profile.id);

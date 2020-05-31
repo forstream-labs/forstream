@@ -20,7 +20,7 @@
     "eslint": "7.1.0",
     "eslint-config-airbnb-base": "14.1.0",
     "eslint-plugin-import": "2.20.2",
-    "release-n-publish": "0.0.9"
+    "release-n-publish": "0.0.14"
   },
   "dependencies": {
     "app-module-path": "2.2.0",
