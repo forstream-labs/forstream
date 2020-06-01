@@ -81,14 +81,14 @@ exports.signInWithGoogle = async (authCode) => {
 };
 
 exports.signInWithFacebook = async (accessToken) => {
-  logger.info('Sign in with Facebook...');
+  logger.info('Signing in with Facebook...');
 
   logger.debug('Getting Facebook profile data...');
   const options = {access_token: accessToken, fields: 'first_name,last_name,email,picture.width(320)'};
   const profile = await facebookApi.api('me', options);
   logger.debug('[FacebookId %s] Facebook profile data: %j', profile.id, profile);
 
-  logger.info('[FacebookId %s] Searching user with facebook_id...', profile.id);
+  logger.info('[FacebookId %s] Searching user by facebook_id...', profile.id);
   let user = await queries.find(User, {facebook_id: profile.id}, {require: false});
   if (user) {
     logger.info('[FacebookId %s] User %s was found, returning it!', profile.id, user.id);
