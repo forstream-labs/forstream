@@ -27,11 +27,7 @@ app.use(cors());
 app.use('/assets', express.static(configs.assetsPath));
 app.use('/public', express.static(configs.publicPath));
 app.use(morgan('tiny', {stream: {write: (message) => logger.console.debug(message)}}));
-app.use(bodyParser.json({
-  verify(req, res, buf) {
-    req.rawBody = buf;
-  },
-}));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(compression());
