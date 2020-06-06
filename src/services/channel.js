@@ -3,13 +3,10 @@
 const configs = require('configs');
 const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
-const youtubeSP = require('services/stream-providers/youtube');
-const facebookSP = require('services/stream-providers/facebook');
 const {Channel, ConnectedChannel, LiveStream, User} = require('models');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 const queries = require('utils/queries');
-const {addSeconds} = require('date-fns');
 const pubSub = require('pubsub-js');
 
 pubSub.subscribe('token_refreshed', async (msg, data) => {
@@ -79,29 +76,45 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   };
 
   logger.info('[User %s] Getting target id...', user.id);
-  const targetId = await youtubeSP.getTargetId(oauth2);
+  const channels = await googleApi.youtube.channels.list({auth: oauth2, part: 'id', mine: true});
+  const targetId = channels.data.items[0].id;
 
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
-  logger.info('[User %s] YouTube channel %s connected!', loadedUser.id, connectedChannel.id);
+  logger.info('[User %s] YouTube channel connected: %s', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
 
-exports.connectFacebookChannel = async (user, accessToken) => {
-  logger.info('[User %s] Connecting Facebook channel...', user.id);
+exports.listFacebookChannelTargets = async (user, accessToken) => {
+  logger.info('[User %s] Getting profile...', user.id);
+  const profile = await facebookApi.api('me', {access_token: accessToken});
+  logger.info('[User %s] Listing pages...', user.id);
+  const pages = await facebookApi.api('me/accounts', {access_token: accessToken});
+  const targets = [
+    {id: profile.id, name: profile.name},
+    ...pages.data.map((page) => { return {id: page.id, name: page.name}; }),
+  ];
+  logger.info('[User %s] %s target(s) found', user.id, targets.length);
+  return targets;
+};
+
+exports.connectFacebookChannel = async (user, accessToken, targetId) => {
+  logger.info('[User %s] Connecting Facebook channel %s...', user.id, targetId);
   const loadedUser = await queries.get(User, user.id);
 
-  logger.info('[User %s] Generating oauth2 config...', user.id);
+  logger.info('[User %s] Getting profile...', user.id);
+  const profile = await facebookApi.api('me', {access_token: accessToken});
+  logger.info('[User %s] Getting long lived access token...', user.id);
   const longLivedAccessToken = await facebookApi.getLongLivedAccessToken(accessToken);
-  const oauth2Config = {
-    access_token: longLivedAccessToken.access_token,
-    expiry_date: addSeconds(new Date(), longLivedAccessToken.expires_in),
-  };
-
-  logger.info('[User %s] Getting target id...', user.id);
-  const targetId = await facebookSP.getTargetId(oauth2Config.access_token);
-
+  const oauth2Config = {};
+  if (profile.id === targetId) {
+    oauth2Config.access_token = longLivedAccessToken.access_token;
+  } else {
+    logger.info('[User %s] Target is a page, getting long lived page access token...', user.id);
+    const page = await facebookApi.api(targetId, {fields: 'access_token', access_token: longLivedAccessToken.access_token});
+    oauth2Config.access_token = page.access_token;
+  }
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
-  logger.info('[User %s] Facebook channel %s connected!', loadedUser.id, connectedChannel.id);
+  logger.info('[User %s] Facebook channel %s connected: %s', loadedUser.id, targetId, connectedChannel.id);
   return connectedChannel;
 };
 

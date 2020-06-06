@@ -63,15 +63,6 @@ async function bindBroadcast(auth, broadcast, stream) {
   });
 }
 
-exports.getTargetId = async (auth) => {
-  const channels = await youtubeApi.channels.list({
-    auth,
-    part: 'id',
-    mine: true,
-  });
-  return channels.data.items[0].id;
-};
-
 exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
   try {
     const auth = googleApi.getOauth2FromConnectedChannel(connectedChannel);

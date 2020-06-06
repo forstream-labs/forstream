@@ -4,11 +4,6 @@ const facebookApi = require('apis/facebook');
 const constants = require('utils/constants');
 const logger = require('utils/logger');
 
-exports.getTargetId = async (auth) => {
-  const user = await facebookApi.api('me', {access_token: auth});
-  return user.id;
-};
-
 exports.createLiveStream = async (connectedChannel, title, description) => {
   try {
     const accessToken = connectedChannel.oauth2.access_token;
