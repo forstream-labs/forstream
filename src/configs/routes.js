@@ -1,14 +1,14 @@
 'use strict';
 
-const userRoutes = require('routes/user');
-const channelRoutes = require('routes/channel');
-const streamRoutes = require('routes/stream');
+const userRoutesV1 = require('routes/v1/user');
+const channelRoutesV1 = require('routes/v1/channel');
+const streamRoutesV1 = require('routes/v1/stream');
 
 const logger = require('utils/logger');
 
 exports.configure = (express, app) => {
   logger.info('Configuring routes');
-  userRoutes(express, app);
-  channelRoutes(express, app);
-  streamRoutes(express, app);
+  userRoutesV1(express, app);
+  channelRoutesV1(express, app);
+  streamRoutesV1(express, app);
 };

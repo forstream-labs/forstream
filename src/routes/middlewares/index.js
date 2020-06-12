@@ -4,7 +4,7 @@ const channelService = require('services/channel');
 const streamService = require('services/stream');
 const errors = require('utils/errors');
 const logger = require('utils/logger');
-const session = require('utils/session');
+const sessions = require('utils/sessions');
 const _ = require('lodash');
 
 function getId(req, key) {
@@ -20,8 +20,8 @@ exports.decodeToken = async (req) => {
   if (!req.token) {
     return;
   }
-  await session.touchToken(req.token);
-  req.user = await session.decodeToken(req.token);
+  await sessions.touchToken(req.token);
+  req.user = await sessions.decodeToken(req.token);
 };
 
 exports.userAuthenticated = async (req, res, next) => {

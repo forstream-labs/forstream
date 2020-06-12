@@ -41,9 +41,9 @@ module.exports = (express, app) => {
   channelsRouter.get('/facebook/targets', userAuthenticated, helpers.baseCallback(listFacebookChannelTargets));
   channelsRouter.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
   channelsRouter.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
-  app.use('/channels', channelsRouter);
+  app.use('/v1/channels', channelsRouter);
 
   const connectedChannelsRouter = express.Router({mergeParams: true});
   connectedChannelsRouter.get('/:connected_channel', [userAuthenticated, connectedChannelBelongsToUser], helpers.baseCallback(getConnectedChannel));
-  app.use('/connected_channels', connectedChannelsRouter);
+  app.use('/v1/connected_channels', connectedChannelsRouter);
 };

@@ -6,7 +6,7 @@ const helpers = require('routes/helpers');
 const channelService = require('services/channel');
 const streamService = require('services/stream');
 const userService = require('services/user');
-const session = require('utils/session');
+const sessions = require('utils/sessions');
 const multer = require('multer');
 
 const upload = multer({dest: configs.uploadsPath});
@@ -46,19 +46,19 @@ async function listMyLiveStreams(req, res) {
 
 async function signInWithGoogle(req, res) {
   const user = await userService.signInWithGoogle(req.body.auth_code);
-  const token = await session.createToken(user);
+  const token = await sessions.createToken(user);
   res.json({token, user});
 }
 
 async function signInWithFacebook(req, res) {
   const user = await userService.signInWithFacebook(req.body.access_token);
-  const token = await session.createToken(user);
+  const token = await sessions.createToken(user);
   res.json({token, user});
 }
 
 async function signOut(req, res) {
   if (req.token) {
-    await session.destroyToken(req.token);
+    await sessions.destroyToken(req.token);
   }
   res.json({});
 }
@@ -73,5 +73,5 @@ module.exports = (express, app) => {
   router.post('/sign_in/google', helpers.baseCallback(signInWithGoogle));
   router.post('/sign_in/facebook', helpers.baseCallback(signInWithFacebook));
   router.post('/sign_out', userAuthenticated, helpers.baseCallback(signOut));
-  app.use('/users', router);
+  app.use('/v1/users', router);
 };
