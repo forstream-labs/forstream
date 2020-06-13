@@ -1,7 +1,7 @@
 'use strict';
 
 const googleApi = require('apis/google');
-const constants = require('utils/constants');
+const {constants} = require('@forstream/models');
 const {logger} = require('@forstream/utils');
 const _ = require('lodash');
 

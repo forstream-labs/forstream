@@ -5,8 +5,8 @@ require('json.date-extensions');
 
 const configs = require('configs');
 const routes = require('configs/routes');
-const logger = require('@forstream/utils').logger;
-const mongo = require('@forstream/models').mongo;
+const {mongo} = require('@forstream/models');
+const {logger} = require('@forstream/utils');
 const bearerToken = require('express-bearer-token');
 const bodyParser = require('body-parser');
 const compression = require('compression');

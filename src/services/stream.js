@@ -2,9 +2,9 @@
 
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
-const constants = require('utils/constants');
 const queries = require('utils/queries');
 const {errors, logger} = require('@forstream/utils');
+const {constants} = require('@forstream/models');
 const {ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
 const _ = require('lodash');
 

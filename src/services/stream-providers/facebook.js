@@ -1,7 +1,7 @@
 'use strict';
 
 const facebookApi = require('apis/facebook');
-const constants = require('utils/constants');
+const {constants} = require('@forstream/models');
 const {logger} = require('@forstream/utils');
 
 exports.createLiveStream = async (connectedChannel, title, description) => {
