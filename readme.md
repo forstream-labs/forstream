@@ -1,15 +1,3 @@
-## Installing dependencies ##
-
-````
-npm install
-````
-
-## Running the project ##
-
-````
-npm start
-````
-
 ## Releasing a new version ##
 
 ````

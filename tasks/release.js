@@ -2,8 +2,8 @@
 
 'use strict';
 
-const {commands, release} = require('release-n-publish');
 const path = require('path');
+const {commands, release} = require('release-n-publish');
 
 const WORKING_DIR = path.resolve();
 

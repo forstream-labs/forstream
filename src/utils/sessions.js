@@ -1,10 +1,9 @@
 'use strict';
 
 const configs = require('configs');
-const errors = require('utils/errors');
-const logger = require('utils/logger');
 const redis = require('apis/redis');
-const {User} = require('models');
+const {errors, logger} = require('@forstream/utils');
+const {User} = require('@forstream/models').models;
 const Promise = require('bluebird');
 const JwtRedis = require('jsonwebtoken-redis');
 

@@ -2,7 +2,7 @@
 
 const facebookApi = require('apis/facebook');
 const constants = require('utils/constants');
-const logger = require('utils/logger');
+const {logger} = require('@forstream/utils');
 
 exports.createLiveStream = async (connectedChannel, title, description) => {
   try {

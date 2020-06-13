@@ -1,7 +1,7 @@
 'use strict';
 
 const configs = require('configs');
-const logger = require('utils/logger');
+const {logger} = require('@forstream/utils');
 // eslint-disable-next-line import/no-self-import
 const redis = require('redis');
 

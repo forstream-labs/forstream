@@ -1,6 +1,6 @@
 'use strict';
 
-const errors = require('utils/errors');
+const {errors} = require('@forstream/utils');
 const _ = require('lodash');
 
 function throwNotFoundIfNeeded(model, obj, options) {

@@ -4,10 +4,10 @@
   "version": "0.0.11",
   "private": true,
   "homepage": "https://forstream.io",
-  "author": {
-    "name": "Forstream team",
-    "email": "contact@forstream.io",
-    "url": "https://forstream.io"
+  "author": "Forstream team <contact@forstream.io> (https://forstream.io)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/forstream/forstream.git"
   },
   "scripts": {
     "lint": "eslint '**/*.js'",
@@ -17,40 +17,37 @@
     "publish-dist": "node tasks/publish.js"
   },
   "devDependencies": {
-    "eslint": "7.1.0",
-    "eslint-config-airbnb-base": "14.1.0",
-    "eslint-plugin-import": "2.20.2",
+    "eslint": "7.2.0",
+    "eslint-config-airbnb-base": "14.2.0",
+    "eslint-plugin-import": "2.21.2",
     "release-n-publish": "0.0.14"
   },
   "dependencies": {
+    "@forstream/models": "0.0.1",
+    "@forstream/utils": "0.0.2",
     "app-module-path": "2.2.0",
-    "aws-sdk": "2.688.0",
+    "aws-sdk": "2.696.0",
     "axios": "0.19.2",
-    "bcrypt": "4.0.1",
+    "bcrypt": "5.0.0",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
     "compression": "1.7.4",
     "cookie-parser": "1.4.5",
     "cors": "2.8.5",
-    "date-fns": "2.14.0",
     "express": "4.17.1",
     "express-bearer-token": "2.4.0",
     "fb": "2.0.0",
-    "googleapis": "52.0.0",
+    "googleapis": "52.1.0",
     "json.date-extensions": "1.2.2",
-    "jsonwebtoken": "8.5.1",
     "jsonwebtoken-redis": "1.0.6",
     "lodash": "4.17.15",
     "mkdirp": "1.0.4",
-    "mongoose": "5.9.17",
     "morgan": "1.10.0",
     "multer": "1.4.2",
     "pubsub-js": "1.8.0",
     "redis": "3.0.2",
-    "rimraf": "3.0.2",
-    "sharp": "0.25.3",
+    "sharp": "0.25.4",
     "uuid": "8.1.0",
-    "winston": "3.2.1",
     "yamljs": "0.3.0"
   }
 }

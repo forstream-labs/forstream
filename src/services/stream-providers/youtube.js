@@ -2,7 +2,7 @@
 
 const googleApi = require('apis/google');
 const constants = require('utils/constants');
-const logger = require('utils/logger');
+const {logger} = require('@forstream/utils');
 const _ = require('lodash');
 
 const youtubeApi = googleApi.youtube;

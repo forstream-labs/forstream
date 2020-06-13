@@ -3,10 +3,10 @@
 const configs = require('configs');
 const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
-const {Channel, ConnectedChannel, LiveStream, User} = require('models');
 const constants = require('utils/constants');
-const logger = require('utils/logger');
 const queries = require('utils/queries');
+const {logger} = require('@forstream/utils');
+const {Channel, ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
 const pubSub = require('pubsub-js');
 
 pubSub.subscribe('token_refreshed', async (msg, data) => {
