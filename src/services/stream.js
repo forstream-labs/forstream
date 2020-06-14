@@ -1,5 +1,7 @@
 'use strict';
 
+const configs = require('configs');
+const rtmpApi = require('apis/rtmp');
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
 const queries = require('utils/queries');
@@ -7,6 +9,7 @@ const {errors, logger} = require('@forstream/utils');
 const {constants} = require('@forstream/models');
 const {ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
 const _ = require('lodash');
+const {nanoid} = require('nanoid');
 
 const PROVIDER_BY_CHANNEL = {};
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.YOUTUBE}`] = youtubeSP;
@@ -75,7 +78,7 @@ async function endProviderStream(liveStream, providerStream) {
 async function changeLiveStreamProviderState(liveStream, channel, enabled) {
   logger.info('[LiveStream %s] %s provider %s...', liveStream.id, enabled ? 'Enabling' : 'Disabling', channel);
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
-  if (loadedLiveStream.status === constants.streamStatus.COMPLETE) {
+  if (loadedLiveStream.stream_status === constants.streamStatus.COMPLETE) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
   const providerStream = loadedLiveStream.providers.find((currentProvider) => currentProvider.connected_channel.channel.identifier === channel);
@@ -117,15 +120,20 @@ exports.createLiveStream = async (user, title, description, channels) => {
     promises.push(createProviderStream(loadedUser, connectedChannel, title, description, new Date()));
   });
   const providers = await Promise.all(promises);
+  const streamKey = nanoid();
+  const streamUrl = `${configs.rtmpServerUrl}/${streamKey}`;
   const liveStream = new LiveStream({
     title,
     description,
     user: loadedUser,
-    status: constants.streamStatus.READY,
+    stream_key: streamKey,
+    stream_url: streamUrl,
+    stream_status: constants.streamStatus.READY,
     providers: providers.filter((provider) => provider !== null),
     registration_date: new Date(),
   });
   await liveStream.save();
+  await rtmpApi.relayPush(liveStream);
   logger.info('[User %s] Live stream %s created!', loadedUser.id, liveStream.id);
   return liveStream;
 };
@@ -141,13 +149,13 @@ exports.startLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Starting live stream...', liveStream.id);
   const promises = [];
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
-  if (loadedLiveStream.status === constants.streamStatus.COMPLETE) {
+  if (loadedLiveStream.stream_status === constants.streamStatus.COMPLETE) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
   loadedLiveStream.providers.forEach((providerStream) => promises.push(startProviderStream(loadedLiveStream, providerStream)));
   await Promise.all(promises);
   loadedLiveStream.set({
-    status: constants.streamStatus.LIVE,
+    stream_status: constants.streamStatus.LIVE,
     start_date: loadedLiveStream.start_date || new Date(),
   });
   await loadedLiveStream.save();
@@ -159,13 +167,13 @@ exports.endLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Ending live stream...', liveStream.id);
   const promises = [];
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
-  if (loadedLiveStream.status !== constants.streamStatus.LIVE) {
+  if (loadedLiveStream.stream_status !== constants.streamStatus.LIVE) {
     throw errors.apiError('live_stream_not_live', 'Live stream is not live');
   }
   loadedLiveStream.providers.forEach((providerStream) => promises.push(endProviderStream(loadedLiveStream, providerStream)));
   await Promise.all(promises);
   loadedLiveStream.set({
-    status: constants.streamStatus.COMPLETE,
+    stream_status: constants.streamStatus.COMPLETE,
     end_date: new Date(),
   });
   await loadedLiveStream.save();

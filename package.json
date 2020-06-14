@@ -23,7 +23,7 @@
     "release-n-publish": "0.0.14"
   },
   "dependencies": {
-    "@forstream/models": "0.0.1",
+    "@forstream/models": "0.0.3",
     "@forstream/utils": "0.0.2",
     "app-module-path": "2.2.0",
     "aws-sdk": "2.696.0",
@@ -44,6 +44,7 @@
     "mkdirp": "1.0.4",
     "morgan": "1.10.0",
     "multer": "1.4.2",
+    "nanoid": "^3.1.10",
     "pubsub-js": "1.8.0",
     "redis": "3.0.2",
     "sharp": "0.25.4",

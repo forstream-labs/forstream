@@ -78,14 +78,29 @@ exports.createLiveStream = async (connectedChannel, title, description, startDat
       stream_status: constants.streamStatus.READY,
     };
   } catch (err) {
-    const {errors} = err;
-    const messages = errors.map((error) => {
-      return {
+    let messages = [];
+    if (err.errors) {
+      const {errors} = err;
+      messages = errors.map((error) => {
+        return {
+          type: constants.providerMessage.type.ERROR,
+          code: error.reason,
+          message: error.message,
+        };
+      });
+    } else if (err.response.data.error) {
+      const {data} = err.response;
+      messages = [{
         type: constants.providerMessage.type.ERROR,
-        code: error.reason,
-        message: error.message,
-      };
-    });
+        code: data.error,
+        message: data.error_description,
+      }];
+    } else {
+      messages = [{
+        type: constants.providerMessage.type.ERROR,
+        code: 'unknown_error',
+      }];
+    }
     return {
       messages,
       broadcast_id: null,

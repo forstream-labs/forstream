@@ -25,8 +25,8 @@ exports.port = get('app.port', 3000);
 exports.debug = get('app.debug', false);
 exports.domain = 'forstream.io';
 
-exports.serverUrl = this.env === constants.environment.PRODUCTION ? `https://api.${this.domain}` : `http://${get('app.host', 'localhost')}:${this.port}`;
-exports.websiteUrl = `https://www.${this.domain}`;
+exports.rtmpApiUrl = `http://${get('rtmp.api.host', 'localhost')}:${get('rtmp.api.port', 5000)}/api`;
+exports.rtmpServerUrl = this.env === constants.environment.PRODUCTION ? `rtmp://rtmp.${this.domain}/live` : `rtmp://${getRequired('app.host')}/live`;
 
 exports.assetsUrl = `${this.serverUrl}/assets`;
 exports.assetsPath = get('app.assetsPath', path.resolve('assets'));
