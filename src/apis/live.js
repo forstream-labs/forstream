@@ -3,13 +3,14 @@
 const configs = require('configs');
 const axios = require('axios');
 const Promise = require('bluebird');
+const _ = require('lodash');
 
-const apiClient = axios.create({
-  baseURL: configs.rtmpApiUrl,
+const liveClient = axios.create({
+  baseURL: configs.liveApiUrl,
 });
 
 exports.relayPush = async (liveStream) => {
-  const requests = liveStream.providers.map((providerStream) => {
+  const requests = _.compact(liveStream.providers.map((providerStream) => {
     if (!providerStream.stream_url) {
       return null;
     }
@@ -17,7 +18,7 @@ exports.relayPush = async (liveStream) => {
     params.append('app', 'live');
     params.append('name', liveStream.stream_key);
     params.append('url', providerStream.stream_url);
-    return apiClient.post('/relay/push', params);
-  })
-  return Promise.all(requests);
+    return liveClient.post('/relay/push', params);
+  }));
+  await Promise.all(requests);
 };

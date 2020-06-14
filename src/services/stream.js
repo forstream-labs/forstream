@@ -1,7 +1,7 @@
 'use strict';
 
 const configs = require('configs');
-const rtmpApi = require('apis/rtmp');
+const liveApi = require('apis/live');
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
 const queries = require('utils/queries');
@@ -121,7 +121,7 @@ exports.createLiveStream = async (user, title, description, channels) => {
   });
   const providers = await Promise.all(promises);
   const streamKey = nanoid();
-  const streamUrl = `${configs.rtmpServerUrl}/${streamKey}`;
+  const streamUrl = `${configs.liveRtmpUrl}/${streamKey}`;
   const liveStream = new LiveStream({
     title,
     description,
@@ -133,7 +133,6 @@ exports.createLiveStream = async (user, title, description, channels) => {
     registration_date: new Date(),
   });
   await liveStream.save();
-  await rtmpApi.relayPush(liveStream);
   logger.info('[User %s] Live stream %s created!', loadedUser.id, liveStream.id);
   return liveStream;
 };
@@ -158,6 +157,7 @@ exports.startLiveStream = async (liveStream) => {
     stream_status: constants.streamStatus.LIVE,
     start_date: loadedLiveStream.start_date || new Date(),
   });
+  await liveApi.relayPush(liveStream);
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream started!', loadedLiveStream.id);
   return loadedLiveStream;
