@@ -29,7 +29,7 @@ const serverHost = this.env === constants.environment.DEVELOPMENT ? getRequired(
 exports.serverUrl = this.env === constants.environment.PRODUCTION ? `https://api.${this.domain}` : `http://${serverHost}:${this.port}`;
 
 const liveHost = this.env === constants.environment.PRODUCTION ? getRequired('live.host') : get('live.host', serverHost);
-exports.liveApiUrl = this.env === `http://${liveHost}:${get('live.api.port', 5000)}/api`;
+exports.liveApiUrl = `http://${liveHost}:${get('live.api.port', 5000)}/api`;
 exports.liveRtmpUrl = this.env === constants.environment.PRODUCTION ? `rtmp://rtmp.${this.domain}/live` : `rtmp://${liveHost}/live`;
 
 exports.assetsUrl = `${this.serverUrl}/assets`;
@@ -84,6 +84,11 @@ exports.facebook = {
   appSecret: getRequired('facebook.appSecret'),
 };
 
+exports.twitch = {
+  clientId: getRequired('twitch.clientId'),
+  clientSecret: getRequired('twitch.clientSecret'),
+};
+
 exports.aws = {
   keyId: get('aws.keyId'),
   secret: get('aws.secret'),
@@ -102,3 +107,5 @@ if (this.env === constants.environment.PRODUCTION) {
   process.env.AWS_ACCESS_KEY_ID = this.aws.keyId;
   process.env.AWS_SECRET_ACCESS_KEY = this.aws.secret;
 }
+
+console.log(this)

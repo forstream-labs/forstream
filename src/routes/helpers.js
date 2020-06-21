@@ -77,6 +77,7 @@ exports.getOptions = (req) => {
     populate: fixPopulate(populate),
     sort: fixSort(req.query.sort),
     last: req.query.last || null,
+    skip: req.query.skip ? parseInt(req.query.skip, 10) : null,
     limit: req.query.limit ? parseInt(req.query.limit, 10) : null,
     require: this.toBoolean(req.query.require),
   };

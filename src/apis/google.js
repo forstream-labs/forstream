@@ -29,7 +29,10 @@ exports.getOauth2FromConnectedChannel = (connectedChannel) => {
   oauth2.setCredentials(connectedChannel.oauth2);
   oauth2.on('tokens', (tokens) => {
     pubSub.publish('token_refreshed', {
-      tokens,
+      credentials: {
+        access_token: tokens.access_token,
+        expiry_date: new Date(tokens.expiry_date),
+      },
       connected_channel: connectedChannel,
     });
   });

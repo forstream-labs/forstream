@@ -24,6 +24,11 @@ async function connectFacebookChannel(req, res) {
   res.json(connectedChannel);
 }
 
+async function connectTwitchChannel(req, res) {
+  const connectedChannel = await channelService.connectTwitchChannel(req.user, req.body.auth_code);
+  res.json(connectedChannel);
+}
+
 async function disconnectChannel(req, res) {
   await channelService.disconnectChannel(req.user, req.params.channel);
   res.json({});
@@ -40,6 +45,7 @@ module.exports = (express, app) => {
   channelsRouter.post('/youtube/connect', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
   channelsRouter.get('/facebook/targets', userAuthenticated, helpers.baseCallback(listFacebookChannelTargets));
   channelsRouter.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
+  channelsRouter.post('/twitch/connect', userAuthenticated, helpers.baseCallback(connectTwitchChannel));
   channelsRouter.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
   app.use('/v1/channels', channelsRouter);
 

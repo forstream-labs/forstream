@@ -25,11 +25,14 @@ function fillQuery(queryBuilder, options) {
   if (queryOptions.sort) {
     queryBuilder.sort(queryOptions.sort);
   }
+  if (queryOptions.skip) {
+    queryBuilder.skip(queryOptions.skip);
+  }
   if (queryOptions.limit) {
     queryBuilder.limit(queryOptions.limit);
   }
   if (queryOptions.last) {
-    const desc = queryOptions.sort ? _.find(queryOptions.sort, (order) => order === -1) === -1 : false;
+    const desc = queryOptions.sort ? _.find(queryOptions.sort, (order) => order === 'desc' || order === -1) : false;
     if (desc) {
       queryBuilder.where('_id').lt(queryOptions.last);
     } else {

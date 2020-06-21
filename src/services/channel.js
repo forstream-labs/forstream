@@ -3,6 +3,7 @@
 const configs = require('configs');
 const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
+const twitchApi = require('apis/twitch');
 const queries = require('utils/queries');
 const {constants} = require('@forstream/models');
 const {Channel, ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
@@ -12,12 +13,7 @@ const pubSub = require('pubsub-js');
 pubSub.subscribe('token_refreshed', async (msg, data) => {
   const connectedChannel = await queries.get(ConnectedChannel, data.connected_channel.id, {populate: 'channel'});
   logger.info('[ConnectedChannel %s] Updating access token...', connectedChannel.id);
-  if (connectedChannel.channel.identifier === constants.channel.identifier.YOUTUBE) {
-    connectedChannel.oauth2.set({
-      access_token: data.tokens.access_token,
-      expiry_date: new Date(data.tokens.expiry_date),
-    });
-  }
+  connectedChannel.oauth2.set(data.credentials);
   await connectedChannel.save();
   logger.info('[ConnectedChannel %s] Access token updated!', connectedChannel.id);
 });
@@ -30,6 +26,7 @@ function setupChannels() {
         name: 'YouTube',
         identifier: constants.channel.identifier.YOUTUBE,
         image_url: `${configs.assetsUrl}/channels/youtube.png`,
+        required_scopes: ['https://www.googleapis.com/auth/youtube'],
         registration_date: new Date(),
       }).save();
     }
@@ -39,6 +36,17 @@ function setupChannels() {
         name: 'Facebook',
         identifier: constants.channel.identifier.FACEBOOK,
         image_url: `${configs.assetsUrl}/channels/facebook.png`,
+        required_scopes: ['publish_video', 'pages_show_list', 'pages_read_engagement', 'pages_manage_posts'],
+        registration_date: new Date(),
+      }).save();
+    }
+    const twitchChannel = await queries.find(Channel, {identifier: constants.channel.identifier.TWITCH}, {require: false});
+    if (!twitchChannel) {
+      await new Channel({
+        name: 'Twitch',
+        identifier: constants.channel.identifier.TWITCH,
+        image_url: `${configs.assetsUrl}/channels/twitch.png`,
+        required_scopes: ['openid', 'channel_read', 'channel_editor'],
         registration_date: new Date(),
       }).save();
     }
@@ -115,6 +123,22 @@ exports.connectFacebookChannel = async (user, accessToken, targetId) => {
   }
   const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
   logger.info('[User %s] Facebook channel %s connected: %s', loadedUser.id, targetId, connectedChannel.id);
+  return connectedChannel;
+};
+
+exports.connectTwitchChannel = async (user, authCode) => {
+  logger.info('[User %s] Connecting Twitch channel...', user.id);
+  const loadedUser = await queries.get(User, user.id);
+
+  logger.info('[User %s] Generating oauth2 config...', user.id);
+  const oauth2Config = await twitchApi.getCredentials(authCode);
+
+  logger.info('[User %s] Getting target id...', user.id);
+  const twitchClient = twitchApi.getClient(oauth2Config);
+  const twitchUser = await twitchClient.helix.users.getMe(false);
+
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.TWITCH, twitchUser.name, oauth2Config);
+  logger.info('[User %s] Twitch channel connected: %s', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
 

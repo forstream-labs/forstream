@@ -4,6 +4,7 @@ const configs = require('configs');
 const liveApi = require('apis/live');
 const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
+const twitchSP = require('services/stream-providers/twitch');
 const queries = require('utils/queries');
 const {errors, logger} = require('@forstream/utils');
 const {constants} = require('@forstream/models');
@@ -14,6 +15,7 @@ const {nanoid} = require('nanoid');
 const PROVIDER_BY_CHANNEL = {};
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.YOUTUBE}`] = youtubeSP;
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.FACEBOOK}`] = facebookSP;
+PROVIDER_BY_CHANNEL[`${constants.channel.identifier.TWITCH}`] = twitchSP;
 
 async function createProviderStream(user, connectedChannel, title, description, startDate) {
   const {channel} = connectedChannel;
@@ -41,7 +43,7 @@ async function startProviderStream(liveStream, providerStream) {
     if (activeLiveStream) {
       if (providerStream.stream_status === constants.streamStatus.READY) {
         logger.info('[LiveStream %s] [Provider %s] Starting stream...', liveStream.id, channel.identifier);
-        await provider.startLiveStream(providerStream);
+        await provider.startLiveStream(liveStream, providerStream);
         logger.info('[LiveStream %s] [Provider %s] Stream started!', liveStream.id, channel.identifier);
       } else {
         logger.info('[LiveStream %s] [Provider %s] Stream was already started!', liveStream.id, channel.identifier);
@@ -52,7 +54,7 @@ async function startProviderStream(liveStream, providerStream) {
       providerStream.set({...streamData});
       if (providerStream.stream_status === constants.streamStatus.READY) {
         logger.info('[LiveStream %s] [Provider %s] Stream created, starting provider stream...', liveStream.id, channel.identifier);
-        await provider.startLiveStream(providerStream);
+        await provider.startLiveStream(liveStream, providerStream);
         logger.info('[LiveStream %s] [Provider %s] Stream started!', liveStream.id, channel.identifier);
       } else {
         logger.info('[LiveStream %s] [Provider %s] Stream was created with ERRORS and will NOT be started!', liveStream.id, channel.identifier);
