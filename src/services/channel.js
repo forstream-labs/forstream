@@ -11,11 +11,11 @@ const {logger} = require('@forstream/utils');
 const pubSub = require('pubsub-js');
 
 pubSub.subscribe('token_refreshed', async (msg, data) => {
-  const connectedChannel = await queries.get(ConnectedChannel, data.connected_channel.id, {populate: 'channel'});
-  logger.info('[ConnectedChannel %s] Updating access token...', connectedChannel.id);
+  const connectedChannel = await queries.get(ConnectedChannel, data.owner.id, {populate: 'channel'});
+  logger.info('[ConnectedChannel %s] Updating oauth2 config...', connectedChannel.id);
   connectedChannel.oauth2.set(data.credentials);
   await connectedChannel.save();
-  logger.info('[ConnectedChannel %s] Access token updated!', connectedChannel.id);
+  logger.info('[ConnectedChannel %s] Oauth2 config updated!', connectedChannel.id);
 });
 
 function setupChannels() {

@@ -15,19 +15,19 @@ exports.getCredentials = async (authCode) => {
   };
 };
 
-exports.getClient = (credentials, connectedChannel) => {
+exports.getClient = (credentials, owner) => {
   return TwitchClient.withCredentials(configs.twitch.clientId, credentials.access_token, undefined, {
     clientSecret: configs.twitch.clientSecret,
     refreshToken: credentials.refresh_token,
     expiry: credentials.expiry_date,
     onRefresh: (token) => {
-      if (connectedChannel) {
+      if (owner) {
         pubSub.publish('token_refreshed', {
+          owner,
           credentials: {
             access_token: token.accessToken,
             expiry_date: token.expiryDate,
           },
-          connected_channel: connectedChannel,
         });
       }
     },

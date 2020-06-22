@@ -107,5 +107,3 @@ if (this.env === constants.environment.PRODUCTION) {
   process.env.AWS_ACCESS_KEY_ID = this.aws.keyId;
   process.env.AWS_SECRET_ACCESS_KEY = this.aws.secret;
 }
-
-console.log(this)

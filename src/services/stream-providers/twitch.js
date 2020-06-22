@@ -20,6 +20,7 @@ exports.createLiveStream = async (connectedChannel, title, description) => {
       stream_status: constants.streamStatus.ERROR,
       messages: [{
         type: constants.providerMessage.type.ERROR,
+        code: err.message,
         message: err.message,
       }],
     };
