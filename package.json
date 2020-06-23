@@ -12,12 +12,12 @@
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node src/app.js",
-    "build-image": "docker build -t forstream .",
+    "build-image": "docker build --build-arg NPM_TOKEN=${NPM_TOKEN} -t forstream .",
     "release-dist": "node tasks/release.js",
     "publish-dist": "node tasks/publish.js"
   },
   "devDependencies": {
-    "eslint": "7.3.0",
+    "eslint": "7.2.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.21.2",
     "release-n-publish": "0.0.14"
@@ -26,7 +26,7 @@
     "@forstream/models": "0.0.5",
     "@forstream/utils": "0.0.2",
     "app-module-path": "2.2.0",
-    "aws-sdk": "2.701.0",
+    "aws-sdk": "2.702.0",
     "axios": "0.19.2",
     "bcrypt": "5.0.0",
     "bluebird": "3.7.2",

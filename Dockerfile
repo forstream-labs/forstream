@@ -2,6 +2,8 @@ FROM keymetrics/pm2:12-alpine
 
 WORKDIR /usr/src/forstream
 
+ARG NPM_TOKEN
+COPY .npmrc .npmrc
 COPY src src/
 COPY assets assets/
 COPY package.json .
@@ -14,7 +16,7 @@ RUN apk update && apk upgrade && \
     --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/main \
     --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community
 
-RUN npm install --production
+RUN npm install --production && rm -f .npmrc
 
 EXPOSE 3000
 
