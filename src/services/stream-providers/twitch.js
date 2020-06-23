@@ -2,9 +2,8 @@
 
 const twitchApi = require('apis/twitch');
 const {constants} = require('@forstream/models');
-const {logger} = require('@forstream/utils');
 
-exports.createLiveStream = async (connectedChannel, title, description) => {
+exports.createLiveStream = async (connectedChannel) => {
   try {
     const twitchClient = twitchApi.getClient(connectedChannel.oauth2, connectedChannel);
     const channel = await twitchClient.kraken.channels.getMyChannel();
@@ -38,6 +37,4 @@ exports.endLiveStream = async (providerStream) => {
   providerStream.set({stream_status: constants.streamStatus.COMPLETE});
 };
 
-exports.isActiveLiveStream = async (providerStream) => {
-  return true;
-};
+exports.isActiveLiveStream = async () => true;

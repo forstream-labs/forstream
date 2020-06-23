@@ -1,6 +1,7 @@
 'use strict';
 
 const configs = require('configs');
+// eslint-disable-next-line import/no-self-import
 const TwitchClient = require('twitch').default;
 const pubSub = require('pubsub-js');
 
@@ -15,21 +16,19 @@ exports.getCredentials = async (authCode) => {
   };
 };
 
-exports.getClient = (credentials, owner) => {
-  return TwitchClient.withCredentials(configs.twitch.clientId, credentials.access_token, undefined, {
-    clientSecret: configs.twitch.clientSecret,
-    refreshToken: credentials.refresh_token,
-    expiry: credentials.expiry_date,
-    onRefresh: (token) => {
-      if (owner) {
-        pubSub.publish('token_refreshed', {
-          owner,
-          credentials: {
-            access_token: token.accessToken,
-            expiry_date: token.expiryDate,
-          },
-        });
-      }
-    },
-  });
-};
+exports.getClient = (credentials, owner) => TwitchClient.withCredentials(configs.twitch.clientId, credentials.access_token, undefined, {
+  clientSecret: configs.twitch.clientSecret,
+  refreshToken: credentials.refresh_token,
+  expiry: credentials.expiry_date,
+  onRefresh: (token) => {
+    if (owner) {
+      pubSub.publish('token_refreshed', {
+        owner,
+        credentials: {
+          access_token: token.accessToken,
+          expiry_date: token.expiryDate,
+        },
+      });
+    }
+  },
+});
