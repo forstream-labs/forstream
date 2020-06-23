@@ -17,6 +17,8 @@ if (require.main === module) {
   publish.setWorkingDir(WORKING_DIR);
   publish.setLintTask(lintProject);
   publish.setDockerProject({
+    // eslint-disable-next-line no-template-curly-in-string
+    buildArgs: '--build-arg NPM_TOKEN=${NPM_TOKEN}',
     ecr: {
       profile: 'forstream',
       region: 'us-east-1',

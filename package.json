@@ -1,7 +1,7 @@
 {
   "name": "forstream",
   "description": "Forstream Core Server",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": true,
   "homepage": "https://forstream.io",
   "author": "Forstream team <contact@forstream.io> (https://forstream.io)",
@@ -20,7 +20,7 @@
     "eslint": "7.2.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.21.2",
-    "release-n-publish": "0.0.15"
+    "release-n-publish": "0.0.17"
   },
   "dependencies": {
     "@forstream/models": "0.0.5",
