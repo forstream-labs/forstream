@@ -1,13 +1,13 @@
 {
   "name": "forstream",
   "description": "Forstream Core Server",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": true,
   "homepage": "https://forstream.io",
   "author": "Forstream team <contact@forstream.io> (https://forstream.io)",
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/forstream/forstream.git"
+    "url": "https://bitbucket.org/forstream/forstream.git"
   },
   "scripts": {
     "lint": "eslint '**/*.js'",
@@ -20,7 +20,7 @@
     "eslint": "7.2.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.21.2",
-    "release-n-publish": "0.0.14"
+    "release-n-publish": "0.0.15"
   },
   "dependencies": {
     "@forstream/models": "0.0.5",
