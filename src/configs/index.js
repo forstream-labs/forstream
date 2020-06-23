@@ -30,7 +30,7 @@ exports.serverUrl = this.env === constants.environment.PRODUCTION ? `https://api
 
 const liveHost = this.env === constants.environment.PRODUCTION ? getRequired('live.host') : get('live.host', serverHost);
 exports.liveApiUrl = `http://${liveHost}:${get('live.api.port', 5000)}/api`;
-exports.liveRtmpUrl = this.env === constants.environment.PRODUCTION ? `rtmp://rtmp.${this.domain}/live` : `rtmp://${liveHost}/live`;
+exports.liveRtmpUrl = this.env === constants.environment.PRODUCTION ? `rtmp://live.${this.domain}/live` : `rtmp://${liveHost}/live`;
 
 exports.assetsUrl = `${this.serverUrl}/assets`;
 exports.assetsPath = get('app.assetsPath', path.resolve('assets'));
