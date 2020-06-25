@@ -42,7 +42,7 @@ exports.signInWithGoogle = async (authCode) => {
   logger.info('Signing in with Google...');
 
   logger.debug('Getting Google profile data...');
-  const oauth2 = await googleApi.getOauth2(authCode);
+  const oauth2 = await googleApi.getOauth2FromAuthCode(authCode);
   const profile = await oauth2Api.userinfo.get({auth: oauth2});
   logger.debug('[GoogleId %s] Google profile data: %j', profile.data.id, profile.data);
 

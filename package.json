@@ -17,16 +17,16 @@
     "publish-dist": "node tasks/publish.js"
   },
   "devDependencies": {
-    "eslint": "7.2.0",
+    "eslint": "7.3.1",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.21.2",
     "release-n-publish": "0.0.17"
   },
   "dependencies": {
-    "@forstream/models": "0.0.5",
+    "@forstream/models": "0.0.7",
     "@forstream/utils": "0.0.2",
     "app-module-path": "2.2.0",
-    "aws-sdk": "2.702.0",
+    "aws-sdk": "2.705.0",
     "axios": "0.19.2",
     "bcrypt": "5.0.0",
     "bluebird": "3.7.2",
@@ -48,8 +48,8 @@
     "pubsub-js": "1.8.0",
     "redis": "3.0.2",
     "sharp": "0.25.4",
-    "twitch": "4.0.10",
-    "uuid": "8.1.0",
+    "twitch": "4.0.12",
+    "uuid": "8.2.0",
     "yamljs": "0.3.0"
   }
 }

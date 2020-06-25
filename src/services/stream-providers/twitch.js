@@ -5,7 +5,7 @@ const {constants} = require('@forstream/models');
 
 exports.createLiveStream = async (connectedChannel) => {
   try {
-    const twitchClient = twitchApi.getClient(connectedChannel.oauth2, connectedChannel);
+    const twitchClient = twitchApi.getClient(connectedChannel.credentials, connectedChannel);
     const channel = await twitchClient.kraken.channels.getMyChannel();
     return {
       broadcast_id: null,
@@ -27,7 +27,8 @@ exports.createLiveStream = async (connectedChannel) => {
 };
 
 exports.startLiveStream = async (liveStream, providerStream) => {
-  const twitchClient = twitchApi.getClient(providerStream.connected_channel.oauth2, providerStream.connected_channel);
+  const connectedChannel = providerStream.connected_channel;
+  const twitchClient = twitchApi.getClient(connectedChannel.credentials, connectedChannel);
   const channel = await twitchClient.kraken.channels.getMyChannel();
   await twitchClient.kraken.channels.updateChannel(channel, {status: liveStream.title});
   providerStream.set({stream_status: constants.streamStatus.LIVE, messages: []});

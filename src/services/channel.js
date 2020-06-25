@@ -12,10 +12,10 @@ const pubSub = require('pubsub-js');
 
 pubSub.subscribe('token_refreshed', async (msg, data) => {
   const connectedChannel = await queries.get(ConnectedChannel, data.owner.id, {populate: 'channel'});
-  logger.info('[ConnectedChannel %s] Updating oauth2 config...', connectedChannel.id);
-  connectedChannel.oauth2.set(data.credentials);
+  logger.info('[ConnectedChannel %s] Updating credentials...', connectedChannel.id);
+  connectedChannel.credentials.set(data.tokens);
   await connectedChannel.save();
-  logger.info('[ConnectedChannel %s] Oauth2 config updated!', connectedChannel.id);
+  logger.info('[ConnectedChannel %s] Credentials updated!', connectedChannel.id);
 });
 
 function setupChannels() {
@@ -53,7 +53,7 @@ function setupChannels() {
   }, 5000);
 }
 
-async function connectChannel(user, identifier, targetId, oauth2) {
+async function connectChannel(user, identifier, targetId, credentials) {
   const channel = await queries.find(Channel, {identifier});
   let connectedChannel = await queries.find(ConnectedChannel, {user: user.id, channel: channel.id}, {require: false});
   if (!connectedChannel) {
@@ -63,7 +63,7 @@ async function connectChannel(user, identifier, targetId, oauth2) {
       registration_date: new Date(),
     });
   }
-  connectedChannel.set({oauth2, target_id: targetId});
+  connectedChannel.set({credentials, target_id: targetId});
   return connectedChannel.save();
 }
 
@@ -75,9 +75,9 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   logger.info('[User %s] Connecting YouTube channel...', user.id);
   const loadedUser = await queries.get(User, user.id);
 
-  logger.info('[User %s] Generating oauth2 config...', user.id);
-  const oauth2 = await googleApi.getOauth2(authCode);
-  const oauth2Config = {
+  logger.info('[User %s] Generating credentials...', user.id);
+  const oauth2 = await googleApi.getOauth2FromAuthCode(authCode);
+  const credentials = {
     access_token: oauth2.credentials.access_token,
     refresh_token: oauth2.credentials.refresh_token,
     expiry_date: new Date(oauth2.credentials.expiry_date),
@@ -87,7 +87,7 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   const channels = await googleApi.youtube.channels.list({auth: oauth2, part: 'id', mine: true});
   const targetId = channels.data.items[0].id;
 
-  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, oauth2Config);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, targetId, credentials);
   logger.info('[User %s] YouTube channel connected: %s', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
@@ -113,15 +113,15 @@ exports.connectFacebookChannel = async (user, accessToken, targetId) => {
   const profile = await facebookApi.api('me', {access_token: accessToken});
   logger.info('[User %s] Getting long lived access token...', user.id);
   const longLivedAccessToken = await facebookApi.getLongLivedAccessToken(accessToken);
-  const oauth2Config = {};
+  const credentials = {};
   if (profile.id === targetId) {
-    oauth2Config.access_token = longLivedAccessToken.access_token;
+    credentials.access_token = longLivedAccessToken.access_token;
   } else {
     logger.info('[User %s] Target is a page, getting long lived page access token...', user.id);
     const page = await facebookApi.api(targetId, {fields: 'access_token', access_token: longLivedAccessToken.access_token});
-    oauth2Config.access_token = page.access_token;
+    credentials.access_token = page.access_token;
   }
-  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, oauth2Config);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.FACEBOOK, targetId, credentials);
   logger.info('[User %s] Facebook channel %s connected: %s', loadedUser.id, targetId, connectedChannel.id);
   return connectedChannel;
 };
@@ -130,14 +130,14 @@ exports.connectTwitchChannel = async (user, authCode) => {
   logger.info('[User %s] Connecting Twitch channel...', user.id);
   const loadedUser = await queries.get(User, user.id);
 
-  logger.info('[User %s] Generating oauth2 config...', user.id);
-  const oauth2Config = await twitchApi.getCredentials(authCode);
+  logger.info('[User %s] Generating credentials...', user.id);
+  const credentials = await twitchApi.getTokens(authCode);
 
   logger.info('[User %s] Getting target id...', user.id);
-  const twitchClient = twitchApi.getClient(oauth2Config);
+  const twitchClient = twitchApi.getClient(credentials);
   const twitchUser = await twitchClient.helix.users.getMe(false);
 
-  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.TWITCH, twitchUser.name, oauth2Config);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.TWITCH, twitchUser.name, credentials);
   logger.info('[User %s] Twitch channel connected: %s', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };

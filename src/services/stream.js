@@ -39,7 +39,7 @@ async function startProviderStream(liveStream, providerStream) {
   const connectedChannel = providerStream.connected_channel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider && providerStream.enabled) {
-    const activeLiveStream = await provider.isActiveLiveStream(providerStream);
+    const activeLiveStream = providerStream.stream_status === constants.streamStatus.ERROR || (await provider.isActiveLiveStream(providerStream));
     if (activeLiveStream) {
       if (providerStream.stream_status === constants.streamStatus.READY) {
         logger.info('[LiveStream %s] [Provider %s] Starting stream...', liveStream.id, channel.identifier);

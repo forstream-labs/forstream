@@ -17,23 +17,23 @@ const youtubeApi = google.youtube({
 exports.oauth2 = oauth2Api;
 exports.youtube = youtubeApi;
 
-exports.getOauth2 = async (authCode) => {
+exports.getOauth2FromAuthCode = async (authCode) => {
   const oauth2 = new google.auth.OAuth2(configs.google.oauth2.clientId, configs.google.oauth2.clientSecret);
   const {tokens} = await oauth2.getToken(authCode);
   oauth2.setCredentials(tokens);
   return oauth2;
 };
 
-exports.getOauth2FromConnectedChannel = (connectedChannel) => {
+exports.getOauth2 = (tokens, owner) => {
   const oauth2 = new google.auth.OAuth2(configs.google.oauth2.clientId, configs.google.oauth2.clientSecret);
-  oauth2.setCredentials(connectedChannel.oauth2);
-  oauth2.on('tokens', (tokens) => {
+  oauth2.setCredentials(tokens);
+  oauth2.on('tokens', (refreshedTokens) => {
     pubSub.publish('token_refreshed', {
-      credentials: {
-        access_token: tokens.access_token,
-        expiry_date: new Date(tokens.expiry_date),
+      owner,
+      tokens: {
+        access_token: refreshedTokens.access_token,
+        expiry_date: new Date(refreshedTokens.expiry_date),
       },
-      connected_channel: connectedChannel,
     });
   });
   return oauth2;

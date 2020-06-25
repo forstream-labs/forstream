@@ -65,7 +65,7 @@ async function bindBroadcast(auth, broadcast, stream) {
 
 exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
   try {
-    const auth = googleApi.getOauth2FromConnectedChannel(connectedChannel);
+    const auth = googleApi.getOauth2(connectedChannel.credentials, connectedChannel);
     logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
     const broadcast = await createBroadcast(auth, title, description, startDate);
     logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, connectedChannel.channel.identifier);
@@ -116,7 +116,8 @@ exports.startLiveStream = async (liveStream, providerStream) => {
 
 exports.endLiveStream = async (providerStream) => {
   try {
-    const auth = googleApi.getOauth2FromConnectedChannel(providerStream.connected_channel);
+    const connectedChannel = providerStream.connected_channel;
+    const auth = googleApi.getOauth2(connectedChannel.credentials, connectedChannel);
     await youtubeApi.liveBroadcasts.transition({
       auth,
       id: providerStream.broadcast_id,
@@ -131,7 +132,8 @@ exports.endLiveStream = async (providerStream) => {
 
 exports.isActiveLiveStream = async (providerStream) => {
   try {
-    const auth = googleApi.getOauth2FromConnectedChannel(providerStream.connected_channel);
+    const connectedChannel = providerStream.connected_channel;
+    const auth = googleApi.getOauth2(connectedChannel.credentials, connectedChannel);
     const broadcasts = await youtubeApi.liveBroadcasts.list({
       auth,
       part: 'id,snippet,contentDetails,status',
