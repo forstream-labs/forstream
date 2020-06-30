@@ -20,7 +20,7 @@ async function connectFacebookChannel(req, res) {
 }
 
 async function listFacebookPageChannelTargets(req, res) {
-  const channelTargets = await channelService.listFacebookPageChannelTargets(req.user, req.get('access_token'));
+  const channelTargets = await channelService.listFacebookPageChannelTargets(req.user, req.get('access-token'));
   res.json(channelTargets);
 }
 
