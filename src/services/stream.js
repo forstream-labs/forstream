@@ -2,9 +2,10 @@
 
 const configs = require('configs');
 const liveApi = require('apis/live');
-const youtubeSP = require('services/stream-providers/youtube');
 const facebookSP = require('services/stream-providers/facebook');
+const rtmpSP = require('services/stream-providers/rtmp');
 const twitchSP = require('services/stream-providers/twitch');
+const youtubeSP = require('services/stream-providers/youtube');
 const queries = require('utils/queries');
 const {errors, logger} = require('@forstream/utils');
 const {constants} = require('@forstream/models');
@@ -15,7 +16,9 @@ const {nanoid} = require('nanoid');
 const PROVIDER_BY_CHANNEL = {};
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.YOUTUBE}`] = youtubeSP;
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.FACEBOOK}`] = facebookSP;
+PROVIDER_BY_CHANNEL[`${constants.channel.identifier.FACEBOOK_PAGE}`] = facebookSP;
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.TWITCH}`] = twitchSP;
+PROVIDER_BY_CHANNEL[`${constants.channel.identifier.RTMP}`] = rtmpSP;
 
 async function createProviderStream(user, connectedChannel, title, description, startDate) {
   const {channel} = connectedChannel;

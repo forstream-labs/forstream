@@ -14,18 +14,28 @@ async function connectYouTubeChannel(req, res) {
   res.json(connectedChannel);
 }
 
-async function listFacebookChannelTargets(req, res) {
-  const channelTargets = await channelService.listFacebookChannelTargets(req.user, req.query.access_token);
-  res.json(channelTargets);
-}
-
 async function connectFacebookChannel(req, res) {
   const connectedChannel = await channelService.connectFacebookChannel(req.user, req.body.access_token, req.body.target_id);
   res.json(connectedChannel);
 }
 
+async function listFacebookPageChannelTargets(req, res) {
+  const channelTargets = await channelService.listFacebookPageChannelTargets(req.user, req.get('access_token'));
+  res.json(channelTargets);
+}
+
+async function connectFacebookPageChannel(req, res) {
+  const connectedChannel = await channelService.connectFacebookPageChannel(req.user, req.body.access_token, req.body.target_id);
+  res.json(connectedChannel);
+}
+
 async function connectTwitchChannel(req, res) {
   const connectedChannel = await channelService.connectTwitchChannel(req.user, req.body.auth_code);
+  res.json(connectedChannel);
+}
+
+async function connectRtmpChannel(req, res) {
+  const connectedChannel = await channelService.connectRtmpChannel(req.user, req.body.channel_name, req.body.rtmp_url, req.body.stream_key);
   res.json(connectedChannel);
 }
 
@@ -43,9 +53,11 @@ module.exports = (express, app) => {
   const channelsRouter = express.Router({mergeParams: true});
   channelsRouter.get('', userAuthenticated, helpers.baseCallback(listChannels));
   channelsRouter.post('/youtube/connect', userAuthenticated, helpers.baseCallback(connectYouTubeChannel));
-  channelsRouter.get('/facebook/targets', userAuthenticated, helpers.baseCallback(listFacebookChannelTargets));
   channelsRouter.post('/facebook/connect', userAuthenticated, helpers.baseCallback(connectFacebookChannel));
+  channelsRouter.get('/facebook_page/targets', userAuthenticated, helpers.baseCallback(listFacebookPageChannelTargets));
+  channelsRouter.post('/facebook_page/connect', userAuthenticated, helpers.baseCallback(connectFacebookPageChannel));
   channelsRouter.post('/twitch/connect', userAuthenticated, helpers.baseCallback(connectTwitchChannel));
+  channelsRouter.post('/rtmp/connect', userAuthenticated, helpers.baseCallback(connectRtmpChannel));
   channelsRouter.post('/:channel/disconnect', userAuthenticated, helpers.baseCallback(disconnectChannel));
   app.use('/v1/channels', channelsRouter);
 

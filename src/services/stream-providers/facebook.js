@@ -8,7 +8,7 @@ exports.createLiveStream = async (connectedChannel, title, description) => {
   try {
     const accessToken = connectedChannel.credentials.access_token;
     logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
-    const broadcast = await facebookApi.api(`${connectedChannel.target_id}/live_videos`, 'POST', {
+    const broadcast = await facebookApi.api(`${connectedChannel.target.id}/live_videos`, 'POST', {
       title,
       description,
       status: 'LIVE_NOW',
