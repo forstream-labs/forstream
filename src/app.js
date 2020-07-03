@@ -17,7 +17,7 @@ const morgan = require('morgan');
 
 JSON.useDateParser();
 
-logger.create({level: configs.debug ? 'debug' : 'info', filename: 'forstream.log'});
+logger.setup({level: configs.debug ? 'debug' : 'info', filename: 'forstream.log'});
 mongo.setup({...configs.mongo, logger});
 
 const app = express();
