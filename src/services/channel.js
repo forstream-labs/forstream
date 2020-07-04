@@ -50,7 +50,7 @@ function setupChannels() {
         identifier: constants.channel.identifier.FACEBOOK_PAGE,
         image_url: `${configs.assetsUrl}/channels/facebook_page.png`,
         presentation_order: 3,
-        required_scopes: ['publish_video', 'pages_show_list', 'pages_read_engagement', 'pages_manage_posts'],
+        required_scopes: ['pages_show_list', 'pages_read_engagement', 'pages_manage_posts'],
         registration_date: new Date(),
       }).save();
     }
