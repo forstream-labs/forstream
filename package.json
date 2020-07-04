@@ -1,7 +1,7 @@
 {
   "name": "forstream",
   "description": "Forstream Core Server",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "private": true,
   "homepage": "https://forstream.io",
   "author": "Forstream team <contact@forstream.io> (https://forstream.io)",
