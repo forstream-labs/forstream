@@ -13,6 +13,7 @@ exports.getTokens = async (authCode) => {
     access_token: tokens.accessToken,
     refresh_token: tokens.refreshToken,
     expiry_date: tokens.expiryDate,
+    scopes: tokens.scope,
   };
 };
 
@@ -33,5 +34,5 @@ exports.getClient = (tokens, owner) => {
       }
     },
   };
-  return TwitchClient.withCredentials(configs.twitch.clientId, tokens.access_token, undefined, refreshConfig);
+  return TwitchClient.withCredentials(configs.twitch.clientId, tokens.access_token, tokens.scopes, refreshConfig);
 };

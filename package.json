@@ -23,7 +23,7 @@
     "release-n-publish": "0.0.17"
   },
   "dependencies": {
-    "@forstream/models": "0.0.12",
+    "@forstream/models": "0.0.13",
     "@forstream/utils": "0.0.3",
     "app-module-path": "2.2.0",
     "aws-sdk": "2.709.0",

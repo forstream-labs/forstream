@@ -11,7 +11,7 @@ const {errors, logger} = require('@forstream/utils');
 const {constants} = require('@forstream/models');
 const {ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
 const _ = require('lodash');
-const {nanoid} = require('nanoid');
+const {v4: uuid} = require('uuid');
 
 const PROVIDER_BY_CHANNEL = {};
 PROVIDER_BY_CHANNEL[`${constants.channel.identifier.YOUTUBE}`] = youtubeSP;
@@ -125,7 +125,7 @@ exports.createLiveStream = async (user, title, description, channels) => {
     promises.push(createProviderStream(loadedUser, connectedChannel, title, description, new Date()));
   });
   const providers = await Promise.all(promises);
-  const streamKey = nanoid();
+  const streamKey = uuid();
   const streamUrl = `${configs.liveRtmpUrl}/${streamKey}`;
   const liveStream = new LiveStream({
     title,

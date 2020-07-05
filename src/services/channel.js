@@ -13,10 +13,10 @@ const pubSub = require('pubsub-js');
 
 pubSub.subscribe('token_refreshed', async (msg, data) => {
   const connectedChannel = await queries.get(ConnectedChannel, data.owner.id, {populate: 'channel'});
-  logger.info('[ConnectedChannel %s] Updating credentials...', connectedChannel.id);
+  logger.info('[User %s] [Channel %s] Updating credentials...', connectedChannel.user, connectedChannel.channel.identifier);
   connectedChannel.credentials.set(data.tokens);
   await connectedChannel.save();
-  logger.info('[ConnectedChannel %s] Credentials updated!', connectedChannel.id);
+  logger.info('[User %s] [Channel %s] Credentials updated!', connectedChannel.user, connectedChannel.channel.identifier);
 });
 
 function setupChannels() {
