@@ -2,12 +2,10 @@
 
 const facebookApi = require('apis/facebook');
 const {constants} = require('@forstream/models');
-const {logger} = require('@forstream/utils');
 
-exports.createLiveStream = async (connectedChannel, title, description) => {
+exports.createLiveStream = async (channel, connectedChannel, title, description) => {
   try {
     const accessToken = connectedChannel.credentials.access_token;
-    logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
     const broadcast = await facebookApi.api(`${connectedChannel.target.id}/live_videos`, 'POST', {
       title,
       description,
@@ -40,20 +38,22 @@ exports.startLiveStream = async (liveStream, providerStream) => {
 
 exports.endLiveStream = async (providerStream) => {
   try {
-    const accessToken = providerStream.connected_channel.credentials.access_token;
+    const connectedChannel = providerStream.connected_channel;
+    const accessToken = connectedChannel.credentials.access_token;
     await facebookApi.api(`${providerStream.broadcast_id}`, 'POST', {
       end_live_video: true,
       access_token: accessToken,
     });
-    providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+    providerStream.set({stream_status: constants.streamStatus.ENDED});
   } catch (err) {
-    // Nothing to do...
+    providerStream.set({stream_status: constants.streamStatus.ENDED});
   }
 };
 
 exports.isActiveLiveStream = async (providerStream) => {
   try {
-    const accessToken = providerStream.connected_channel.credentials.access_token;
+    const connectedChannel = providerStream.connected_channel;
+    const accessToken = connectedChannel.credentials.access_token;
     const broadcast = await facebookApi.api(`${providerStream.broadcast_id}`, 'GET', {access_token: accessToken});
     return broadcast && broadcast.status !== 'VOD';
   } catch (err) {

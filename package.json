@@ -1,7 +1,7 @@
 {
   "name": "forstream",
   "description": "Forstream Core Server",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "private": true,
   "homepage": "https://forstream.io",
   "author": "Forstream team <contact@forstream.io> (https://forstream.io)",
@@ -17,13 +17,13 @@
     "publish-dist": "node tasks/publish.js"
   },
   "devDependencies": {
-    "eslint": "7.3.1",
+    "eslint": "7.4.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.22.0",
     "release-n-publish": "0.0.17"
   },
   "dependencies": {
-    "@forstream/models": "0.0.11",
+    "@forstream/models": "0.0.12",
     "@forstream/utils": "0.0.3",
     "app-module-path": "2.2.0",
     "aws-sdk": "2.709.0",

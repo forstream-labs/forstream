@@ -24,8 +24,8 @@ async function createProviderStream(user, connectedChannel, title, description, 
   const {channel} = connectedChannel;
   const provider = PROVIDER_BY_CHANNEL[channel.identifier];
   if (provider) {
-    logger.info('[User %s] [Provider %s] Creating stream..', user.id, channel.identifier);
-    const streamData = await provider.createLiveStream(connectedChannel, title, description, startDate);
+    logger.info('[User %s] [Provider %s] Creating stream...', user.id, channel.identifier);
+    const streamData = await provider.createLiveStream(channel, connectedChannel, title, description, startDate);
     logger.info('[User %s] [Provider %s] Stream created!', user.id, channel.identifier);
     return {
       ...streamData,
@@ -53,7 +53,7 @@ async function startProviderStream(liveStream, providerStream) {
       }
     } else {
       logger.info('[LiveStream %s] [Provider %s] Stream is not valid anymore, creating another one...', liveStream.id, channel.identifier);
-      const streamData = await provider.createLiveStream(connectedChannel, liveStream.title, liveStream.description, new Date());
+      const streamData = await provider.createLiveStream(channel, connectedChannel, liveStream.title, liveStream.description, new Date());
       providerStream.set({...streamData});
       if (providerStream.stream_status === constants.streamStatus.READY) {
         logger.info('[LiveStream %s] [Provider %s] Stream created, starting provider stream...', liveStream.id, channel.identifier);
@@ -83,7 +83,7 @@ async function endProviderStream(liveStream, providerStream) {
 async function changeLiveStreamProviderState(liveStream, channel, enabled) {
   logger.info('[LiveStream %s] %s provider %s...', liveStream.id, enabled ? 'Enabling' : 'Disabling', channel);
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
-  if (loadedLiveStream.stream_status === constants.streamStatus.COMPLETE) {
+  if (loadedLiveStream.stream_status === constants.streamStatus.ENDED) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
   const providerStream = loadedLiveStream.providers.find((currentProvider) => currentProvider.connected_channel.channel.identifier === channel);
@@ -153,7 +153,7 @@ exports.startLiveStream = async (liveStream) => {
   logger.info('[LiveStream %s] Starting live stream...', liveStream.id);
   const promises = [];
   const loadedLiveStream = await queries.get(LiveStream, liveStream.id, {populate: 'providers.channel providers.connected_channel'});
-  if (loadedLiveStream.stream_status === constants.streamStatus.COMPLETE) {
+  if (loadedLiveStream.stream_status === constants.streamStatus.ENDED) {
     throw errors.apiError('live_stream_already_ended', 'Live stream already ended');
   }
   loadedLiveStream.providers.forEach((providerStream) => promises.push(startProviderStream(loadedLiveStream, providerStream)));
@@ -178,7 +178,7 @@ exports.endLiveStream = async (liveStream) => {
   loadedLiveStream.providers.forEach((providerStream) => promises.push(endProviderStream(loadedLiveStream, providerStream)));
   await Promise.all(promises);
   loadedLiveStream.set({
-    stream_status: constants.streamStatus.COMPLETE,
+    stream_status: constants.streamStatus.ENDED,
     end_date: new Date(),
   });
   await loadedLiveStream.save();

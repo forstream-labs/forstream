@@ -63,14 +63,14 @@ async function bindBroadcast(auth, broadcast, stream) {
   });
 }
 
-exports.createLiveStream = async (connectedChannel, title, description, startDate) => {
+exports.createLiveStream = async (channel, connectedChannel, title, description, startDate) => {
   try {
     const auth = googleApi.getOauth2(connectedChannel.credentials, connectedChannel);
-    logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, connectedChannel.channel.identifier);
+    logger.info('[User %s] [Provider %s] Creating broadcast...', connectedChannel.user, channel.identifier);
     const broadcast = await createBroadcast(auth, title, description, startDate);
-    logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, connectedChannel.channel.identifier);
+    logger.info('[User %s] [Provider %s] Creating stream...', connectedChannel.user, channel.identifier);
     const stream = await createStream(auth, title);
-    logger.info('[User %s] [Provider %s] Binding broadcast to stream...', connectedChannel.user, connectedChannel.channel.identifier);
+    logger.info('[User %s] [Provider %s] Binding broadcast to stream...', connectedChannel.user, channel.identifier);
     await bindBroadcast(auth, broadcast, stream);
     return {
       broadcast_id: broadcast.id,
@@ -124,9 +124,9 @@ exports.endLiveStream = async (providerStream) => {
       broadcastStatus: 'complete',
       part: 'id,snippet,contentDetails,status',
     });
-    providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+    providerStream.set({stream_status: constants.streamStatus.ENDED});
   } catch (err) {
-    // Nothing to do...
+    providerStream.set({stream_status: constants.streamStatus.ENDED});
   }
 };
 

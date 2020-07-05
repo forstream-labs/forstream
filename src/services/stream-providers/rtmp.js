@@ -15,7 +15,7 @@ exports.startLiveStream = async (liveStream, providerStream) => {
 };
 
 exports.endLiveStream = async (providerStream) => {
-  providerStream.set({stream_status: constants.streamStatus.COMPLETE});
+  providerStream.set({stream_status: constants.streamStatus.ENDED});
 };
 
 exports.isActiveLiveStream = async () => true;
