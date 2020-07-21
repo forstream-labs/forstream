@@ -1,6 +1,6 @@
 'use strict';
 
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger} = require('@forstream/commons');
 const _ = require('lodash');
 
 function buildPopulate(populateStr) {

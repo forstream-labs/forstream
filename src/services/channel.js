@@ -7,7 +7,7 @@ const twitchApi = require('apis/twitch');
 const queries = require('utils/queries');
 const {constants} = require('@forstream/models');
 const {Channel, ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger} = require('@forstream/commons');
 const {nanoid} = require('nanoid');
 const pubSub = require('pubsub-js');
 

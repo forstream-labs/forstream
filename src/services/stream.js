@@ -7,7 +7,7 @@ const rtmpSP = require('services/stream-providers/rtmp');
 const twitchSP = require('services/stream-providers/twitch');
 const youtubeSP = require('services/stream-providers/youtube');
 const queries = require('utils/queries');
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger} = require('@forstream/commons');
 const {constants} = require('@forstream/models');
 const {ConnectedChannel, LiveStream, User} = require('@forstream/models').models;
 const _ = require('lodash');
@@ -134,6 +134,7 @@ exports.createLiveStream = async (user, title, description, channels) => {
     stream_key: streamKey,
     stream_url: streamUrl,
     stream_status: constants.streamStatus.READY,
+    recording: false,
     providers: providers.filter((provider) => provider !== null),
     registration_date: new Date(),
   });
@@ -162,7 +163,7 @@ exports.startLiveStream = async (liveStream) => {
     stream_status: constants.streamStatus.LIVE,
     start_date: loadedLiveStream.start_date || new Date(),
   });
-  await liveApi.relayPush(liveStream);
+  await liveApi.relayPush(loadedLiveStream);
   await loadedLiveStream.save();
   logger.info('[LiveStream %s] Live stream started!', loadedLiveStream.id);
   return loadedLiveStream;

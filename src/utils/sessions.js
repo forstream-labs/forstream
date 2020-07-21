@@ -1,13 +1,12 @@
 'use strict';
 
 const configs = require('configs');
-const redis = require('apis/redis');
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger, redis} = require('@forstream/commons');
 const {User} = require('@forstream/models').models;
 const Promise = require('bluebird');
 const JwtRedis = require('jsonwebtoken-redis');
 
-const jwtRedis = new JwtRedis(redis, {
+const jwtRedis = new JwtRedis(redis.getClient(), {
   prefix: configs.session.prefix,
   expiresKeyIn: configs.session.expiresIn,
   promiseImpl: Promise,

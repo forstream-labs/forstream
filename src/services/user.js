@@ -4,7 +4,7 @@ const googleApi = require('apis/google');
 const facebookApi = require('apis/facebook');
 const files = require('utils/files');
 const queries = require('utils/queries');
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger} = require('@forstream/commons');
 const {User} = require('@forstream/models').models;
 const _ = require('lodash');
 

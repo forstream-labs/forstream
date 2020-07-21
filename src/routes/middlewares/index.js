@@ -3,7 +3,7 @@
 const channelService = require('services/channel');
 const streamService = require('services/stream');
 const sessions = require('utils/sessions');
-const {errors, logger} = require('@forstream/utils');
+const {errors, logger} = require('@forstream/commons');
 const _ = require('lodash');
 
 function getId(req, key) {

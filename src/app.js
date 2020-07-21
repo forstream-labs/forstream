@@ -4,9 +4,15 @@ require('app-module-path/register');
 require('json.date-extensions');
 
 const configs = require('configs');
-const routes = require('configs/routes');
 const {mongo} = require('@forstream/models');
-const {logger} = require('@forstream/utils');
+const {logger, redis} = require('@forstream/commons');
+
+// Setup essential dependencies
+logger.setup({level: configs.debug ? 'debug' : 'info', filename: 'forstream.log'});
+mongo.setup({...configs.mongo, logger});
+redis.setup({...configs.redis, logger});
+
+const routes = require('configs/routes');
 const bearerToken = require('express-bearer-token');
 const bodyParser = require('body-parser');
 const compression = require('compression');
@@ -15,10 +21,9 @@ const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
 
-JSON.useDateParser();
+require('services/chat-providers');
 
-logger.setup({level: configs.debug ? 'debug' : 'info', filename: 'forstream.log'});
-mongo.setup({...configs.mongo, logger});
+JSON.useDateParser();
 
 const app = express();
 app.set('env', configs.env);

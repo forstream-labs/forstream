@@ -4,7 +4,7 @@ const userRoutesV1 = require('routes/v1/user');
 const channelRoutesV1 = require('routes/v1/channel');
 const streamRoutesV1 = require('routes/v1/stream');
 
-const {logger} = require('@forstream/utils');
+const {logger} = require('@forstream/commons');
 
 exports.configure = (express, app) => {
   logger.info('Configuring routes');
