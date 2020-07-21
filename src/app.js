@@ -21,6 +21,8 @@ const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
 
+require('services/chat-providers');
+
 JSON.useDateParser();
 
 const app = express();
