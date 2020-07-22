@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@forstream/commons": "0.0.6",
-    "@forstream/models": "0.0.15",
+    "@forstream/models": "0.0.16",
     "app-module-path": "2.2.0",
     "aws-sdk": "2.717.0",
     "axios": "0.19.2",
