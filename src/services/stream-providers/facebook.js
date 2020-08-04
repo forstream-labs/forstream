@@ -2,6 +2,7 @@
 
 const facebookApi = require('apis/facebook');
 const {constants} = require('@forstream/models');
+const _ = require('lodash');
 
 exports.createLiveStream = async (channel, connectedChannel, title, description) => {
   try {
@@ -25,7 +26,7 @@ exports.createLiveStream = async (channel, connectedChannel, title, description)
       stream_status: constants.streamStatus.ERROR,
       messages: [{
         type: constants.providerMessage.type.ERROR,
-        code: error.code,
+        code: _.snakeCase(error.code),
         message: error.message,
       }],
     };

@@ -3,6 +3,7 @@
 const {connectedChannelBelongsToUser, userAuthenticated} = require('routes/middlewares');
 const helpers = require('routes/helpers');
 const channelService = require('services/channel');
+const {ConnectedChannel} = require('@forstream/models').models;
 
 async function listChannels(req, res) {
   const channels = await channelService.listChannels(helpers.getOptions(req));
@@ -49,6 +50,12 @@ async function getConnectedChannel(req, res) {
   res.json(connectedChannel);
 }
 
+async function checkConnectedChannelAlert(req, res) {
+  const connectedChannel = new ConnectedChannel({id: req.params.connected_channel});
+  const updatedConnectedChannel = await channelService.checkConnectedChannelAlert(connectedChannel, req.params.alert);
+  res.json(updatedConnectedChannel);
+}
+
 module.exports = (express, app) => {
   const channelsRouter = express.Router({mergeParams: true});
   channelsRouter.get('', userAuthenticated, helpers.baseCallback(listChannels));
@@ -63,5 +70,6 @@ module.exports = (express, app) => {
 
   const connectedChannelsRouter = express.Router({mergeParams: true});
   connectedChannelsRouter.get('/:connected_channel', [userAuthenticated, connectedChannelBelongsToUser], helpers.baseCallback(getConnectedChannel));
+  connectedChannelsRouter.post('/:connected_channel/alerts/:alert/check', [userAuthenticated, connectedChannelBelongsToUser], helpers.baseCallback(checkConnectedChannelAlert));
   app.use('/v1/connected_channels', connectedChannelsRouter);
 };

@@ -78,13 +78,14 @@ function setupChannels() {
   }, 5000);
 }
 
-async function connectChannel(user, identifier, target, credentials) {
+async function connectChannel(user, identifier, target, credentials, alerts) {
   const channel = await queries.find(Channel, {identifier});
   let connectedChannel = await queries.find(ConnectedChannel, {user: user.id, channel: channel.id}, {require: false});
   if (!connectedChannel) {
     connectedChannel = new ConnectedChannel({
       user,
       channel,
+      alerts,
       registration_date: new Date(),
     });
   }
@@ -115,13 +116,10 @@ exports.connectYouTubeChannel = async (user, authCode) => {
   logger.info('[User %s] Getting channel info...', user.id);
   const channels = await googleApi.youtube.channels.list({auth: oauth2, part: 'id,snippet', mine: true});
   const channel = channels.data.items[0];
-  const target = {
-    id: channel.id,
-    name: channel.snippet.title,
-    url: `https://www.youtube.com/channel/${channel.id}`,
-  };
+  const target = {id: channel.id, name: channel.snippet.title, url: `https://www.youtube.com/channel/${channel.id}`};
+  const alerts = [{id: 'enable_live_streaming', type: constants.connectedChannel.alertType.WARNING, checked: false}];
 
-  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, target, credentials);
+  const connectedChannel = await connectChannel(loadedUser, constants.channel.identifier.YOUTUBE, target, credentials, alerts);
   logger.info('[User %s] YouTube channel connected: %s', loadedUser.id, connectedChannel.id);
   return connectedChannel;
 };
@@ -238,5 +236,17 @@ exports.disconnectChannel = async (user, channel) => {
 };
 
 exports.getConnectedChannel = async (id, options) => queries.get(ConnectedChannel, id, options);
+
+exports.checkConnectedChannelAlert = async (connectedChannel, alertId) => {
+  const loadedConnectedChannel = await queries.get(ConnectedChannel, connectedChannel.id);
+  if (loadedConnectedChannel.alerts) {
+    const alert = loadedConnectedChannel.alerts.find((currentAlert) => currentAlert.id === alertId);
+    if (alert) {
+      alert.set({checked: true});
+      await loadedConnectedChannel.save();
+    }
+  }
+  return loadedConnectedChannel;
+};
 
 setupChannels();

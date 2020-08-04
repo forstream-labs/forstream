@@ -84,7 +84,7 @@ exports.createLiveStream = async (channel, connectedChannel, title, description,
       messages = errors.map((error) => {
         return {
           type: constants.providerMessage.type.ERROR,
-          code: error.reason,
+          code: _.snakeCase(error.reason),
           message: error.message,
         };
       });
@@ -92,7 +92,7 @@ exports.createLiveStream = async (channel, connectedChannel, title, description,
       const {data} = err.response;
       messages = [{
         type: constants.providerMessage.type.ERROR,
-        code: data.error,
+        code: _.snakeCase(data.error),
         message: data.error_description,
       }];
     } else {
